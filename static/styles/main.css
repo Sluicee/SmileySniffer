@@ -62,8 +62,11 @@ body {
     display: flex; /* Используем flexbox */
     align-items: center; /* Выравниваем содержимое по центру по вертикали */
     padding: 10px; /* Добавляем отступы */
+    margin-bottom: 5px; /* Добавляем отступы */
     border-bottom: 1px solid #ddd; /* Добавляем нижнюю границу */
     min-height: 100px;
+    background-color: #ebebeb;
+    border-radius: 8px;
 }
 
 .emote-img {
