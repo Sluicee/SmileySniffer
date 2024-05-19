@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Site with Table and Chat</title>
+    {% assets "main_css" %}
+        <link rel="stylesheet" href="{{ ASSET_URL }}">
+    {% endassets %}
+</head>
+<body>
+
+<div class="header">
+    <h1>{{channel_name}}</h1>
+</div>
+
+<div class="container">
+    <div class="column">
+        <div class="column-header">Chat Box</div>
+        <div class="content" id="chat-box">
+            <!-- Chat messages will be displayed here -->
+        </div>
+    </div>
+
+    <div class="column">
+        <div class="column-header">Emotes Table</div>
+        <div class="content" id="emotes-table-container">
+            <!-- Заменяем тег <table> на контейнер <div> -->
+            <div id="emotes-table">
+                <!-- Каждый эмодзи будет представлен блоком <div> -->
+                <!-- Изображение и имя будут вложенными блоками <div> -->
+            </div>
+        </div>
+        
+    </div>
+</div>
+    {% assets "main_js" %}
+        <script src="{{ ASSET_URL }}"></script>
+    {% endassets %}
+</body>
+</html>

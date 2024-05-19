@@ -1,0 +1,77 @@
+/* Общие стили для всего документа */
+* {
+    box-sizing: border-box; /* Учитываем границы и отступы в общих размерах */
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    color: #333; /* Цвет текста */
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-wrap: wrap; /* Переносим контент на новую строку при необходимости */
+    justify-content: center; /* Выравниваем по центру по горизонтали */
+    padding: 20px; /* Добавляем отступы для контейнера */
+}
+
+.header {
+    text-align: center;
+    width: 100%;
+    margin-bottom: 20px;
+    background-color: #a970ff; /* Цвет фона заголовка */
+    color: #fff; /* Цвет текста заголовка */
+    padding: 20px;
+}
+
+.column {
+    flex: 1; /* Растягиваем колонки на всю доступную ширину */
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin: 10px; /* Добавляем отступы между колонками */
+    overflow: hidden; /* Прячем содержимое, выходящее за границы */
+}
+
+.column-header {
+    background-color: #a970ff; /* Цвет фона заголовка колонки */
+    color: #fff; /* Цвет текста заголовка колонки */
+    padding: 20px;
+    border-radius: 8px 8px 0 0; /* Закругляем верхние углы заголовка */
+}
+
+.content {
+    padding: 20px;
+    max-height: 500px;
+    overflow-x: none; /* Добавляем скролл при необходимости */
+}
+
+.chat-message {
+    background-color: #f9f9f9; /* Цвет фона сообщения */
+    border-radius: 8px; /* Закругляем углы сообщения */
+    padding: 10px;
+    margin-bottom: 10px; /* Добавляем отступ снизу для разделения сообщений */
+}
+
+.emote {
+    display: flex; /* Используем flexbox */
+    align-items: center; /* Выравниваем содержимое по центру по вертикали */
+    padding: 10px; /* Добавляем отступы */
+    border-bottom: 1px solid #ddd; /* Добавляем нижнюю границу */
+}
+
+.emote-img img {
+    max-width: 100px; /* Ограничиваем ширину изображения */
+    height: auto; /* Позволяет изображению сохранять пропорции */
+    margin-right: 10px; /* Добавляем отступ справа */
+}
+
+.emote-name, .emote-counter {
+    flex: 1; /* Растягиваем содержимое, чтобы занимать доступное пространство */
+}
+
