@@ -20,6 +20,7 @@ PREFIX = os.getenv('PREFIX')
 CHANNELS = os.getenv('CHANNELS').split(',')
 UID7TV = dict(item.split("=") for item in os.getenv("UID7TV").split(","))
 
+
 if __name__ == '__main__':
     import threading
     bot_thread = threading.Thread(target=bot.run)  # Создание потока для запуска бота

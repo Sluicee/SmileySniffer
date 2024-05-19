@@ -14,8 +14,21 @@ if os.path.exists(dotenv_path):
 OAUTH_TOKEN = os.getenv('OAUTH_TOKEN')
 PREFIX = os.getenv('PREFIX')
 CHANNELS = os.getenv('CHANNELS').split(',')
-FAVS = ["widetime","Taah","cannyCat","1984",")))","well","dobro","sdd","PogT","ABOBA","TaaPls","WideCatGroove"]
-FAV_PHRASES = ["MyHonestReaction TeaTime","Bedge TeaTime","docnotL ботоводы блять"]
+
+# Открываем файл для чтения
+with open('texts/pasta', 'r', encoding='utf-8') as file:
+    pastas = file.readlines()
+with open('texts/emotes', 'r', encoding='utf-8') as file:
+    emotes = file.readlines()
+
+# Удаляем символ новой строки (\n) из каждой строки и добавляем в список
+pastas = [line.strip() for line in pastas]
+emotes = [line.strip() for line in emotes]
+
+FAVS = emotes
+FAV_PHRASES = pastas
+
+
 class Bot(commands.Bot):
     
     def __init__(self):
@@ -39,8 +52,8 @@ class Bot(commands.Bot):
 
         print(f'{message.author.name}: {message.content}')  # Вывод сообщений в консоль
         
-        if "Taa" in message.content.split():
-            await self.send_message(message.channel.name, "Нет курению Taa")
+        # if "Taa" in message.content.split():
+        #     await self.send_message(message.channel.name, "Нет курению Taa")
             
         # Проверка наличия элементов и вывод первого совпавшего
         for word in message.content.split():
@@ -64,7 +77,7 @@ class Bot(commands.Bot):
     async def emotes(self, ctx, *, username: str = ''):
         await ctx.send(f'xdd')  # Отправка сообщения в чат
         
-    @helpers.cooldown(2.5)
+    @helpers.cooldown(7.5)
     async def send_message(self, channel, message):
         channel_obj = self.get_channel(channel)
         if channel_obj:
