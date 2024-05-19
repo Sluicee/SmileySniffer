@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Site with Table and Chat</title>
     {% assets "main_css" %}
-        <link rel="stylesheet" href="{{ ASSET_URL }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='styles/main.css') }}">
     {% endassets %}
 </head>
 <body>
@@ -34,8 +34,12 @@
         
     </div>
 </div>
+    <script>
+        const channelName = "{{ channel_name }}";
+    </script>
+
     {% assets "main_js" %}
-        <script src="{{ ASSET_URL }}"></script>
+        <script src="{{ url_for('static', filename='scripts/main.js') }}"></script>
     {% endassets %}
 </body>
 </html>

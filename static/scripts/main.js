@@ -23,7 +23,7 @@ let cachedEmotes = null;
     // Получение сообщений с канала и их отображение
     async function fetchMessages() {
         try {
-            const response = await fetch('{{channel_name}}/messages');
+            const response = await fetch(`${channelName}/messages`);
             if (!response.ok) {
                 throw new Error('Failed to fetch messages');
             }
@@ -60,7 +60,7 @@ let cachedEmotes = null;
     // Получение эмодзи с канала и их отображение в таблице
     async function fetchEmotes() {
         try {
-            const response = await fetch('{{channel_name}}/emotes');
+            const response = await fetch(`${channelName}/emotes`);
             if (!response.ok) {
                 throw new Error('Failed to fetch emotes');
             }
@@ -132,7 +132,7 @@ let cachedEmotes = null;
 
     //document.getElementById('send-form').addEventListener('submit', async (e) => {
       //e.preventDefault();
-      //const channel = "{{channel_name}}";
+      //const channel = channelName;
       //const message = document.getElementById('message').value;
       //const response = await fetch('/send', {
         //method: 'POST',
