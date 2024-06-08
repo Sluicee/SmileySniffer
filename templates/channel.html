@@ -11,35 +11,32 @@
 <body>
 
 <div class="header">
-    <h1>{{channel_name}}</h1>
+    <h1><a href="https://www.twitch.tv/{{channel_name}}">{{channel_name}}</a></h1>
 </div>
 
 <div class="container">
-    <div class="column">
-        <div class="column-header">Chat Box</div>
-        <div class="content" id="chat-box">
-            <!-- Chat messages will be displayed here -->
-        </div>
-    </div>
-
-    <div class="column">
-        <div class="column-header">Emotes Table</div>
-        <div class="content" id="emotes-table-container">
-            <!-- Заменяем тег <table> на контейнер <div> -->
-            <div id="emotes-table">
-                <!-- Каждый эмодзи будет представлен блоком <div> -->
-                <!-- Изображение и имя будут вложенными блоками <div> -->
-            </div>
-        </div>
-        
+    <div class="emotes-table-wrapper">
+        <table class="emotes-table" id="emotes-table">
+            <thead>
+                <tr>
+                    <th>Изображение</th>
+                    <th>Название</th>
+                    <th>Счетчик</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Эмодзи будут добавлены здесь динамически -->
+            </tbody>
+        </table>
     </div>
 </div>
-    <script>
-        const channelName = "{{ channel_name }}";
-    </script>
 
-    {% assets "main_js" %}
-        <script src="{{ url_for('static', filename='scripts/main.js') }}"></script>
-    {% endassets %}
+<script>
+    const channelName = "{{ channel_name }}";
+</script>
+
+{% assets "main_js" %}
+    <script src="{{ url_for('static', filename='scripts/main.js') }}"></script>
+{% endassets %}
 </body>
 </html>

@@ -1,6 +1,7 @@
 # main.py
 
 import os
+import helpers
 from dotenv import load_dotenv
 from bot import bot
 from flask_app import app
@@ -19,7 +20,6 @@ CLIENT_SECRET = os.getenv('CLIENT_SECRET')
 PREFIX = os.getenv('PREFIX')
 CHANNELS = os.getenv('CHANNELS').split(',')
 UID7TV = dict(item.split("=") for item in os.getenv("UID7TV").split(","))
-
 
 if __name__ == '__main__':
     import threading

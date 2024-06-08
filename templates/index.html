@@ -1,55 +1,60 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>Twitch Bot Interface</title>
-  <style>
-    body { font-family: Arial, sans-serif; }
-    #messages { max-height: 300px; overflow-y: scroll; border: 1px solid #ccc; padding: 10px; }
-    .message { margin-bottom: 10px; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Channels List</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/main.css') }}">
 </head>
 <body>
-  <h1>Twitch Bot Interface</h1>
-  <div id="messages"></div>
-  <div id="emotes"></div>
-  <form id="send-form">
-    <input type="text" id="channel" placeholder="Channel" required>
-    <input type="text" id="message" placeholder="Message" required>
-    <button type="submit">Send</button>
-  </form>
-  <script>
-    async function fetchMessages() {
-      const response = await fetch('/messages');
-      const messages = await response.json();
-      const messagesDiv = document.getElementById('messages');
-      messagesDiv.innerHTML = '';
-      messages.forEach(msg => {
-        const div = document.createElement('div');
-        div.className = 'message';
-        div.textContent = `${msg.author}: ${msg.content}`;
-        messagesDiv.appendChild(div);
-      });
-    }
+    <div class="header">
+        <h1>Channels</h1>
+    </div>
 
-    document.getElementById('send-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const channel = document.getElementById('channel').value;
-      const message = document.getElementById('message').value;
-      const response = await fetch('/send', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ channel, message })
-      });
-      if (response.ok) {
-        document.getElementById('message').value = '';
-        fetchMessages();
-      }
-    });
+    <div class="container">
+        <div class="channels-list-wrapper">
+            <table class="channels-table" id="channels-table">
+                <thead>
+                    <tr>
+                        <th>Channel Name</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Названия каналов будут добавлены здесь динамически -->
+                </tbody>
+            </table>
+        </div>
+    </div>
 
-    setInterval(fetchMessages, 3000);
-  </script>
+    <script>
+        async function fetchChannels() {
+            try {
+                const response = await fetch('/channels');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch channels');
+                }
+
+                const channels = await response.json();
+                const channelsTableBody = document.querySelector('#channels-table tbody');
+                channelsTableBody.innerHTML = ''; // Очищаем таблицу перед добавлением новых данных
+
+                channels.forEach(channel => {
+                    const tr = document.createElement('tr');
+                    const nameTd = document.createElement('td');
+                    const link = document.createElement('a');
+                    link.href = `/${channel}`;
+                    link.textContent = channel;
+                    nameTd.appendChild(link);
+                    tr.appendChild(nameTd);
+                    channelsTableBody.appendChild(tr);
+                });
+            } catch (error) {
+                console.error('Error occurred while fetching channels:', error);
+            }
+        }
+
+        // Вызываем функцию fetchChannels при загрузке страницы
+        document.addEventListener('DOMContentLoaded', fetchChannels);
+    </script>
 </body>
 </html>

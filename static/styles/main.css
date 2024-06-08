@@ -6,17 +6,14 @@
 }
 
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
-    color: #333; /* Цвет текста */
+    font-family: 'Roboto', sans-serif;
+    background-color: #e3f2fd; /* Светло-голубой фон для страницы */
+    color: #37474f; /* Темный цвет текста */
 }
 
 .container {
-    max-width: 1200px;
+    max-width: 1000px;
     margin: 0 auto;
-    display: flex;
-    flex-wrap: wrap; /* Переносим контент на новую строку при необходимости */
-    justify-content: center; /* Выравниваем по центру по горизонтали */
     padding: 20px; /* Добавляем отступы для контейнера */
 }
 
@@ -24,67 +21,109 @@ body {
     text-align: center;
     width: 100%;
     margin-bottom: 20px;
-    background-color: #a970ff; /* Цвет фона заголовка */
-    color: #fff; /* Цвет текста заголовка */
+    background-color: #1e88e5; /* Синий цвет фона заголовка */
+    color: #ffffff; /* Белый цвет текста заголовка */
     padding: 20px;
+    border-radius: 8px; /* Закругленные углы */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Добавляем тень */
 }
 
-.column {
-    flex: 1; /* Растягиваем колонки на всю доступную ширину */
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    margin: 10px; /* Добавляем отступы между колонками */
+.emotes-table-wrapper {
+    display: flex;
+    justify-content: center; /* Центрируем таблицу */
+}
+
+.emotes-table {
+    width: 100%;
+    border-collapse: collapse; /* Убираем промежутки между ячейками */
+    background-color: #ffffff;
+    border-radius: 8px; /* Закругленные углы */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Добавляем тень */
     overflow: hidden; /* Прячем содержимое, выходящее за границы */
 }
 
-.column-header {
-    background-color: #a970ff; /* Цвет фона заголовка колонки */
-    color: #fff; /* Цвет текста заголовка колонки */
-    padding: 20px;
-    border-radius: 8px 8px 0 0; /* Закругляем верхние углы заголовка */
+.emotes-table th, .emotes-table td {
+    padding: 15px;
+    text-align: left;
 }
 
-.content {
-    padding: 20px;
-    max-height: 500px;
-    overflow-x: hidden; /* Добавляем скролл при необходимости */
+.emotes-table th {
+    background-color: #1e88e5; /* Синий цвет фона заголовка */
+    color: #ffffff; /* Белый цвет текста заголовка */
+    text-transform: uppercase; /* Заглавные буквы */
+    letter-spacing: 1px; /* Добавляем межбуквенный интервал */
 }
 
-.chat-message {
-    background-color: #f9f9f9; /* Цвет фона сообщения */
-    border-radius: 8px; /* Закругляем углы сообщения */
-    padding: 10px;
-    margin-bottom: 10px; /* Добавляем отступ снизу для разделения сообщений */
+.emotes-table td {
+    color: #37474f; /* Темный цвет текста ячеек */
 }
 
-.emote {
-    display: flex; /* Используем flexbox */
-    align-items: center; /* Выравниваем содержимое по центру по вертикали */
-    padding: 10px; /* Добавляем отступы */
-    margin-bottom: 5px; /* Добавляем отступы */
-    border-bottom: 1px solid #ddd; /* Добавляем нижнюю границу */
-    min-height: 100px;
-    background-color: #ebebeb;
-    border-radius: 8px;
+.emotes-table tr:nth-child(even) {
+    background-color: #e1f5fe; /* Светло-голубой фон для четных строк */
 }
 
-.emote-img {
-    width: 120px; /* Ограничиваем ширину изображения */
+.emotes-table tr:nth-child(odd) {
+    background-color: #bbdefb; /* Темно-голубой фон для нечетных строк */
 }
 
-.emote-img img {
-    max-width: 100px; /* Ограничиваем ширину изображения */
+.emotes-table td img {
+    max-width: 80px; /* Ограничиваем ширину изображения */
     height: auto; /* Позволяет изображению сохранять пропорции */
-    margin-right: 10px; /* Добавляем отступ справа */
+    border-radius: 5px; /* Закругленные углы для изображений */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Добавляем тень для изображений */
 }
 
-.emote-name {
-    max-width: 150px;
-    word-wrap: break-word;
+.emotes-table tr {
+    height: 80px; /* Устанавливаем фиксированную высоту строк */
 }
 
-.emote-name, .emote-counter {
-    flex: 1; /* Растягиваем содержимое, чтобы занимать доступное пространство */
+.channels-list-wrapper {
+    display: flex;
+    justify-content: center; /* Центрируем таблицу */
 }
 
+.channels-table {
+    width: 100%;
+    border-collapse: collapse; /* Убираем промежутки между ячейками */
+    background-color: #ffffff;
+    border-radius: 8px; /* Закругленные углы */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Добавляем тень */
+    overflow: hidden; /* Прячем содержимое, выходящее за границы */
+}
+
+.channels-table th, .channels-table td {
+    padding: 15px;
+    text-align: left;
+}
+
+.channels-table th {
+    background-color: #1e88e5; /* Синий цвет фона заголовка */
+    color: #ffffff; /* Белый цвет текста заголовка */
+    text-transform: uppercase; /* Заглавные буквы */
+    letter-spacing: 1px; /* Добавляем межбуквенный интервал */
+}
+
+.channels-table td {
+    color: #37474f; /* Темный цвет текста ячеек */
+}
+
+.channels-table tr:nth-child(even) {
+    background-color: #e1f5fe; /* Светло-голубой фон для четных строк */
+}
+
+.channels-table tr:nth-child(odd) {
+    background-color: #bbdefb; /* Темно-голубой фон для нечетных строк */
+}
+
+.channels-table tr {
+    height: 50px; /* Устанавливаем фиксированную высоту строк */
+}
+
+.channels-table td a {
+    color: #1e88e5; /* Синий цвет текста ссылок */
+    text-decoration: none; /* Убираем подчеркивание ссылок */
+}
+
+.channels-table td a:hover {
+    text-decoration: underline; /* Добавляем подчеркивание при наведении */
+}

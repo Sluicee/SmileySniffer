@@ -39,6 +39,15 @@ def get_emotes(channel_id):
     else:
         print('No emotes found')
 
+def get_emote_names(emo):
+    emotes = []
+    for i in range(len(emo)):
+        emotes.append(emo[i]['name'])
+    if emotes:
+        return emotes
+    else:
+        print('No emotes found')
+    
 
 
 def cooldown(seconds):

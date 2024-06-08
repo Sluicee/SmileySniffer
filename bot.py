@@ -1,39 +1,28 @@
-# bot.py
-
 import os
 import helpers
+import json
 from dotenv import load_dotenv
 from twitchio.ext import commands
+import time
+import schedule
 
-# Получение значений переменных из файла .env
 dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
 if os.path.exists(dotenv_path):
     load_dotenv(dotenv_path)
 
-# Получение значений переменных из файла .env
 OAUTH_TOKEN = os.getenv('OAUTH_TOKEN')
 PREFIX = os.getenv('PREFIX')
 CHANNELS = os.getenv('CHANNELS').split(',')
-
-# Открываем файл для чтения
-with open('texts/pasta', 'r', encoding='utf-8') as file:
-    pastas = file.readlines()
-with open('texts/emotes', 'r', encoding='utf-8') as file:
-    emotes = file.readlines()
-
-# Удаляем символ новой строки (\n) из каждой строки и добавляем в список
-pastas = [line.strip() for line in pastas]
-emotes = [line.strip() for line in emotes]
-
-FAVS = emotes
-FAV_PHRASES = pastas
-
+UID7TV = dict(item.split("=") for item in os.getenv("UID7TV").split(","))
+DATA_DIR = os.getenv('DATA_DIR')
 
 class Bot(commands.Bot):
     
     def __init__(self):
         super().__init__(token=OAUTH_TOKEN, prefix=PREFIX, initial_channels=CHANNELS)
         self.messages = []  # Список для хранения сообщений
+        self.emotes = self.load_emotes()
+        schedule.every(1).minute.do(self.load_emotes)  # Выполняем функцию load_emotes каждую минуту
 
     async def event_ready(self):
         print(f'Logged in as | {self.nick}')  # Вывод информации о входе в аккаунт
@@ -43,46 +32,79 @@ class Bot(commands.Bot):
         if message.echo:  # Проверка на наличие эхо
             return
         
-        # Сохранение сообщений в список
+        # Сохранение сообщений в список с временной меткой
         self.messages.append({
-            'channel' : message.channel.name,
+            'channel': message.channel.name,
             'author': message.author.name,
-            'content': message.content
+            'content': message.content,
+            'timestamp': time.time()  # Добавим временную метку
         })
 
         print(f'{message.author.name}: {message.content}')  # Вывод сообщений в консоль
         
-        # if "Taa" in message.content.split():
-        #     await self.send_message(message.channel.name, "Нет курению Taa")
-            
-        # Проверка наличия элементов и вывод первого совпавшего
+        if "@SmileySniffer привет" == message.content:
+            await self.echo_msg(message.channel.name, "привет :)")
+        
         for word in message.content.split():
-            if word in FAVS:
-                await self.send_message(message.channel.name, word)
-                print("Слово найдено в строке.")
-                break
-        else:
-            print("Ни один из элементов не найден")
-            
-        for phrase in FAV_PHRASES:
-            if phrase in message.content:
-                await self.send_message(message.channel.name, phrase)
-                print("Фраза найдена в строке.")
-                break
-        else:
-            print("Ни одна из фраз не найдена")
+            if word in self.emotes[CHANNELS.index(message.channel.name)]:
+                await self.save_word(message.channel.name, word)
+        
         await self.handle_commands(message)
         
     @commands.command(name='emotes')
     async def emotes(self, ctx, *, username: str = ''):
         await ctx.send(f'xdd')  # Отправка сообщения в чат
         
-    @helpers.cooldown(7.5)
     async def send_message(self, channel, message):
         channel_obj = self.get_channel(channel)
         if channel_obj:
             await channel_obj.send(message)  # Отправка сообщения в чат
         else:
             print(f"Channel {channel} not found.")
+            
+    @helpers.cooldown(7.5)
+    async def echo_msg(self, channel, message):
+        channel_obj = self.get_channel(channel)
+        if channel_obj:
+            await channel_obj.send(message)  # Отправка сообщения в чат
+        else:
+            print(f"Channel {channel} not found.")
+    
+    def load_emotes(self):
+        emotes_array = []  # Создаем пустой двумерный массив для хранения смайликов по каналам
+        for channel in UID7TV:
+            emotes_for_channel = []  # Создаем пустой список для смайликов конкретного канала
+            
+            # Получаем смайлики для текущего канала
+            channel_emotes = helpers.get_emote_names(helpers.get_emotes(UID7TV[channel]))
+            
+            # Добавляем смайлики в список emotes_for_channel
+            emotes_for_channel.extend(channel_emotes)
+            
+            # Добавляем список смайликов текущего канала в двумерный массив
+            emotes_array.append(emotes_for_channel)
+        print("Emotes reloaded")
+        return emotes_array
+        
+    async def save_word(self, channel, word):  # Добавляем метод save_word
+        try:
+            # Создаем имя JSON файла для данного канала
+            channel_filename = f'{channel}.json'
+            channel_file_path = os.path.join(DATA_DIR, channel_filename)
+            
+            # Создаем или обновляем JSON файл
+            if os.path.exists(channel_file_path):
+                with open(channel_file_path, 'r+') as file:
+                    data = json.load(file)
+                    data[word] = data.get(word, 0) + 1
+                    file.seek(0)
+                    json.dump(data, file, indent=4)
+            else:
+                with open(channel_file_path, 'w') as file:
+                    json.dump({word: 1}, file, indent=4)
+            
+            print('Word saved successfully')
+        except Exception as e:
+            print('Error saving word:', str(e))
 
 bot = Bot()
