@@ -11,7 +11,14 @@
 <body>
 
 <div class="header">
-    <h1><a href="https://www.twitch.tv/{{channel_name}}">{{channel_name}}</a></h1>
+    <h1><a href="https://www.twitch.tv/{{ channel_name }}">{{ channel_name }}</a></h1>
+    <div class="channel-dropdown">
+        <select id="channelSelect" onchange="changeChannel()">
+            {% for channel in channels %}
+                <option value="{{ channel }}" {% if channel == channel_name %}selected{% endif %}>{{ channel }}</option>
+            {% endfor %}
+        </select>
+    </div>
 </div>
 
 <div class="container">
@@ -33,6 +40,11 @@
 
 <script>
     const channelName = "{{ channel_name }}";
+
+    function changeChannel() {
+        const selectedChannel = document.getElementById('channelSelect').value;
+        window.location.href = `/${selectedChannel}`;
+    }
 </script>
 
 {% assets "main_js" %}

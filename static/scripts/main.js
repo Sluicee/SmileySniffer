@@ -86,8 +86,8 @@ async function fetchEmotes() {
 
         // Сортировка эмодзи по убыванию значений в dataEmotesCount
         emotes.sort((a, b) => {
-            const countA = dataEmotesCount[a.data["name"]] || 0;
-            const countB = dataEmotesCount[b.data["name"]] || 0;
+            const countA = dataEmotesCount[a.name] || 0;
+            const countB = dataEmotesCount[b.name] || 0;
             return countB - countA; // Сортировка по убыванию
         });
 
@@ -104,11 +104,11 @@ async function fetchEmotes() {
             tr.appendChild(imgTd);
 
             const nameTd = document.createElement('td');
-            nameTd.textContent = emt.data["name"];
+            nameTd.textContent = emt.name;
             tr.appendChild(nameTd);
 
             const counterTd = document.createElement('td');
-            counterTd.textContent = dataEmotesCount[emt.data["name"]] || "0";
+            counterTd.textContent = dataEmotesCount[emt.name] || "0";
             tr.appendChild(counterTd);
 
             emotesTableBody.appendChild(tr);
