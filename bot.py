@@ -9,6 +9,7 @@ import time
 import schedule
 import logging
 import tempfile
+import re
 
 
 dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
@@ -71,8 +72,11 @@ class Bot(commands.Bot):
         
         await self.handle_commands(message)
         
+    @commands.cooldown(rate=1, per=15, bucket=commands.Bucket.channel)
     @commands.command(name='emote')
     async def emotes(self, ctx: commands.Context, emote_name: str):
+        if not re.match(r'^[a-zA-Z]+$', emote_name):
+            return
         try:
             # Попытка получить имя канала через ctx.channel.name
             channel_name = ctx.channel.name
@@ -97,7 +101,8 @@ class Bot(commands.Bot):
                     else:
                         await ctx.channel.send(f'{emote_name} использован {emote_value} {times_word}')
                 else:
-                    await ctx.channel.send(f'{emote_name} не найден')
+                    return
+                    # await ctx.channel.send(f'{emote_name} не найден')
             else:
                 await ctx.channel.send(f'Канал "{channel_name}" не найден.')
 

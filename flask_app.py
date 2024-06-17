@@ -10,6 +10,7 @@ import logging
 from threading import Thread
 import asyncio
 
+
 dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
 if os.path.exists(dotenv_path):
     load_dotenv(dotenv_path)
@@ -18,8 +19,7 @@ if os.path.exists(dotenv_path):
 try:
     if not os.path.exists('logs'):
         os.makedirs('logs')
-    logging.basicConfig(level=logging.INFO, filename="logs/py_log.log", filemode="w", encoding='utf-8',
-                        format="%(asctime)s %(levelname)s %(message)s")
+    logging.basicConfig(level=logging.INFO, filename="logs/py_log.log", filemode="w", encoding='utf-8', format="%(asctime)s %(levelname)s %(message)s")
     logger = logging.getLogger('flask_app')
     logger.info("Starting server and bot")
 except Exception as e:
