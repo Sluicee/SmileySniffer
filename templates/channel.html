@@ -1,55 +1,48 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Site with Table and Chat</title>
-    {% assets "main_css" %}
-        <link rel="stylesheet" href="{{ url_for('static', filename='styles/main.css') }}">
+{% extends 'base.html' %}
+
+{% block title %}Emotes {{ channel_name }}{% endblock %}
+
+{% block content %}
+    <!-- Основное содержимое страницы -->
+    <div class="header">
+        <h1><a href="https://www.twitch.tv/{{ channel_name }}">{{ channel_name }}</a></h1>
+        <div class="channel-dropdown">
+            <select id="channelSelect" onchange="changeChannel()">
+                {% for channel in channels %}
+                    <option value="{{ channel }}" {% if channel == channel_name %}selected{% endif %}>{{ channel }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    
+    <div class="container">
+        <input type="text" id="searchInput" class="search-input" placeholder="Поиск по названию...">
+        <div class="emotes-table-wrapper">
+            <table class="emotes-table" id="emotes-table">
+                <thead>
+                    <tr>
+                        <th>Ранг</th>
+                        <th>Изображение</th>
+                        <th>Название</th>
+                        <th>Счетчик</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Эмодзи будут добавлены здесь динамически -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <script>
+        const channelName = "{{ channel_name }}";
+    
+        function changeChannel() {
+            const selectedChannel = document.getElementById('channelSelect').value;
+            window.location.href = `/${selectedChannel}`;
+        }
+    </script>
+    {% assets "emotes_js" %}
+        <script src="{{ url_for('static', filename='scripts/emotes.js') }}"></script>
     {% endassets %}
-</head>
-<body>
-
-<div class="header">
-    <h1><a href="https://www.twitch.tv/{{ channel_name }}">{{ channel_name }}</a></h1>
-    <div class="channel-dropdown">
-        <select id="channelSelect" onchange="changeChannel()">
-            {% for channel in channels %}
-                <option value="{{ channel }}" {% if channel == channel_name %}selected{% endif %}>{{ channel }}</option>
-            {% endfor %}
-        </select>
-    </div>
-</div>
-
-<div class="container">
-    <div class="emotes-table-wrapper">
-        <table class="emotes-table" id="emotes-table">
-            <thead>
-                <tr>
-                    <th>Ранг</th>
-                    <th>Изображение</th>
-                    <th>Название</th>
-                    <th>Счетчик</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Эмодзи будут добавлены здесь динамически -->
-            </tbody>
-        </table>
-    </div>
-</div>
-
-<script>
-    const channelName = "{{ channel_name }}";
-
-    function changeChannel() {
-        const selectedChannel = document.getElementById('channelSelect').value;
-        window.location.href = `/${selectedChannel}`;
-    }
-</script>
-
-{% assets "main_js" %}
-    <script src="{{ url_for('static', filename='scripts/main.js') }}"></script>
-{% endassets %}
-</body>
-</html>
+{% endblock %}

@@ -6,8 +6,8 @@
 }
 
 body {
-    font-family: 'Roboto', sans-serif;
-    background-color: #e3f2fd; /* Светло-голубой фон для страницы */
+    font-family: 'tilda-sans', sans-serif;
+    background-color: #000000; /* Светло-серый фон для страницы */
     color: #37474f; /* Темный цвет текста */
 }
 
@@ -18,14 +18,51 @@ body {
 }
 
 .header {
-    text-align: center;
-    width: 100%;
-    margin-bottom: 20px;
-    background-color: #1e88e5; /* Синий цвет фона заголовка */
-    color: #ffffff; /* Белый цвет текста заголовка */
+    background-color: #000000; /* Черный цвет фона */
+    color: #ffffff; /* Белый цвет текста */
     padding: 20px;
-    border-radius: 8px; /* Закругленные углы */
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Добавляем тень */
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.header h1 {
+    margin: 0; /* Убираем внешние отступы */
+    font-size: 24px; /* Размер шрифта заголовка */
+    text-align: center; /* Выравниваем текст по центру */
+}
+
+.header a {
+    color: #ffffff; /* Белый цвет текста ссылок */
+    text-decoration: none; /* Убираем подчеркивание ссылок */
+}
+
+.header a:hover {
+    text-decoration: underline; /* Добавляем подчеркивание при наведении */
+}
+
+.channel-dropdown select {
+    padding: 8px; /* Поля внутри выпадающего списка */
+    font-size: 16px; /* Размер шрифта в списке */
+    border: none; /* Убираем границу */
+    background-color: #ffffff; /* Белый цвет фона списка */
+    color: #212121; /* Черный цвет текста */
+    border-radius: 4px; /* Закругленные углы */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Добавляем тень */
+}
+
+.channel-dropdown select:hover {
+    background-color: #f0f0f0; /* Изменяем фон при наведении */
+}
+
+.channel-dropdown select:focus {
+    outline: none; /* Убираем фокусную рамку при фокусе */
+    background-color: #ffffff; /* Возвращаем стандартный фон */
 }
 
 .emotes-table-wrapper {
@@ -37,7 +74,6 @@ body {
 .emotes-table {
     width: 100%;
     border-collapse: collapse; /* Убираем промежутки между ячейками */
-    background-color: #ffffff;
     border-radius: 8px; /* Закругленные углы */
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Добавляем тень */
     overflow: hidden; /* Прячем содержимое, выходящее за границы */
@@ -49,29 +85,29 @@ body {
 }
 
 .emotes-table th {
-    background-color: #1e88e5; /* Синий цвет фона заголовка */
+    background-color: #212121; /* Черный цвет фона заголовка */
     color: #ffffff; /* Белый цвет текста заголовка */
     text-transform: uppercase; /* Заглавные буквы */
     letter-spacing: 1px; /* Добавляем межбуквенный интервал */
 }
 
 .emotes-table td {
-    color: #37474f; /* Темный цвет текста ячеек */
+    color: #ffffff; /* Темный цвет текста ячеек */
 }
 
-.emotes-table th:nth-child(3), /* Третья колонка - название */
+.emotes-table th:nth-child(3),
 .emotes-table td:nth-child(3) {
-    max-width: 350px; /* Установите нужную максимальную ширину */
+    max-width: 450px; /* Установите нужную максимальную ширину */
     word-wrap: break-word; /* Разрешить перенос слов */
     white-space: normal; /* Позволить перенос строк */
 }
 
 .emotes-table tr:nth-child(even) {
-    background-color: #e1f5fe; /* Светло-голубой фон для четных строк */
+    background-color: #030303; /* Светло-серый фон для четных строк */
 }
 
 .emotes-table tr:nth-child(odd) {
-    background-color: #bbdefb; /* Темно-голубой фон для нечетных строк */
+    background-color: #131313; /* Серый фон для нечетных строк */
 }
 
 .emotes-table td img {
@@ -85,9 +121,22 @@ body {
     height: 80px; /* Устанавливаем фиксированную высоту строк */
 }
 
+.search-input {
+    width: 100%;
+    max-width: 300px; /* Ограничиваем ширину поля ввода */
+    margin: 0 auto 10px; /* Центрируем поле поиска по горизонтали и добавляем небольшой отступ снизу */
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
 .channels-list-wrapper {
     display: flex;
     justify-content: center; /* Центрируем таблицу */
+    overflow-x: auto; /* Добавляем горизонтальную прокрутку */
+    margin-bottom: 20px; /* Добавляем отступ снизу */
 }
 
 .channels-table {
@@ -99,13 +148,14 @@ body {
     overflow: hidden; /* Прячем содержимое, выходящее за границы */
 }
 
-.channels-table th, .channels-table td {
+.channels-table th,
+.channels-table td {
     padding: 15px;
     text-align: left;
 }
 
 .channels-table th {
-    background-color: #1e88e5; /* Синий цвет фона заголовка */
+    background-color: #212121; /* Черный цвет фона заголовка */
     color: #ffffff; /* Белый цвет текста заголовка */
     text-transform: uppercase; /* Заглавные буквы */
     letter-spacing: 1px; /* Добавляем межбуквенный интервал */
@@ -116,11 +166,11 @@ body {
 }
 
 .channels-table tr:nth-child(even) {
-    background-color: #e1f5fe; /* Светло-голубой фон для четных строк */
+    background-color: #f5f5f5; /* Светло-серый фон для четных строк */
 }
 
 .channels-table tr:nth-child(odd) {
-    background-color: #bbdefb; /* Темно-голубой фон для нечетных строк */
+    background-color: #e0e0e0; /* Серый фон для нечетных строк */
 }
 
 .channels-table tr {
@@ -128,13 +178,14 @@ body {
 }
 
 .channels-table td a {
-    color: #1e88e5; /* Синий цвет текста ссылок */
+    color: #212121; /* Черный цвет текста ссылок */
     text-decoration: none; /* Убираем подчеркивание ссылок */
 }
 
 .channels-table td a:hover {
     text-decoration: underline; /* Добавляем подчеркивание при наведении */
 }
+
 
 /* Адаптивные стили для мобильных устройств */
 @media (max-width: 768px) {
@@ -155,8 +206,17 @@ body {
         height: auto; /* Убираем фиксированную высоту строк */
     }
 
-    .emotes-table th:nth-child(3), /* Третья колонка - название */
+    .emotes-table th:nth-child(3),
     .emotes-table td:nth-child(3) {
         max-width: 150px; /* Устанавливаем максимальную ширину для мобильных устройств */
     }
+}
+
+@font-face {
+    font-family: 'tilda-sans'; /* Имя, под которым будет доступен шрифт */
+    src: url('../fonts/TildaSans-VF.woff2') format('woff2'), /* Путь к файлу шрифта и его формат */
+         url('../fonts/TildaSans-VF.woff') format('woff'), /* Дополнительные форматы шрифтов, если необходимо */
+         url('../fonts/TildaSans-VF.ttf') format('ttf'); /* Дополнительные форматы шрифтов, если необходимо */
+    font-weight: normal; /* Нормальная толщина шрифта */
+    font-style: normal; /* Нормальный стиль шрифта */
 }

@@ -1,12 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Channels List</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles/main.css') }}">
-</head>
-<body>
+<!-- child_template.html -->
+{% extends 'base.html' %}
+
+{% block title %}Каналы{% endblock %}
+
+{% block content %}
+
     <div class="header">
         <h1>Channels</h1>
     </div>
@@ -26,35 +24,7 @@
         </div>
     </div>
 
-    <script>
-        async function fetchChannels() {
-            try {
-                const response = await fetch('/channels');
-                if (!response.ok) {
-                    throw new Error('Failed to fetch channels');
-                }
-
-                const channels = await response.json();
-                const channelsTableBody = document.querySelector('#channels-table tbody');
-                channelsTableBody.innerHTML = ''; // Очищаем таблицу перед добавлением новых данных
-
-                channels.forEach(channel => {
-                    const tr = document.createElement('tr');
-                    const nameTd = document.createElement('td');
-                    const link = document.createElement('a');
-                    link.href = `/${channel}`;
-                    link.textContent = channel;
-                    nameTd.appendChild(link);
-                    tr.appendChild(nameTd);
-                    channelsTableBody.appendChild(tr);
-                });
-            } catch (error) {
-                console.error('Error occurred while fetching channels:', error);
-            }
-        }
-
-        // Вызываем функцию fetchChannels при загрузке страницы
-        document.addEventListener('DOMContentLoaded', fetchChannels);
-    </script>
-</body>
-</html>
+    {% assets "index_js" %}
+        <script src="{{ url_for('static', filename='scripts/index.js') }}"></script>
+    {% endassets %}
+{% endblock %}

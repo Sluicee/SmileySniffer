@@ -46,6 +46,8 @@ application.debug = True
 assets = Environment(application)
 assets.register('main_css', Bundle('styles/main.css', output='gen/main.css'))
 assets.register('main_js', Bundle('scripts/main.js', output='gen/main.js'))
+assets.register('index_js', Bundle('scripts/main.js', output='gen/main.js'))
+assets.register('emotes_js', Bundle('scripts/main.js', output='gen/main.js'))
 
 @application.route('/')
 def index():
