@@ -77,6 +77,9 @@ class Bot(commands.Bot):
     async def emotes(self, ctx: commands.Context, emote_name: str):
         if not re.match(r'^[a-zA-Z]+$', emote_name):
             return
+        if emote_name == "uzyAnalProlapse":
+            await ctx.channel.send(f'uzyAnalProlapse использован *ДАННЫЕ УДАЛЕНЫ* раз, Ранг: *ДАННЫЕ УДАЛЕНЫ*')
+            return
         try:
             # Попытка получить имя канала через ctx.channel.name
             channel_name = ctx.channel.name

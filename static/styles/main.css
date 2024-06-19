@@ -31,6 +31,7 @@ body {
 .emotes-table-wrapper {
     display: flex;
     justify-content: center; /* Центрируем таблицу */
+    overflow-x: auto; /* Добавляем горизонтальную прокрутку */
 }
 
 .emotes-table {
@@ -56,6 +57,13 @@ body {
 
 .emotes-table td {
     color: #37474f; /* Темный цвет текста ячеек */
+}
+
+.emotes-table th:nth-child(3), /* Третья колонка - название */
+.emotes-table td:nth-child(3) {
+    max-width: 350px; /* Установите нужную максимальную ширину */
+    word-wrap: break-word; /* Разрешить перенос слов */
+    white-space: normal; /* Позволить перенос строк */
 }
 
 .emotes-table tr:nth-child(even) {
@@ -126,4 +134,29 @@ body {
 
 .channels-table td a:hover {
     text-decoration: underline; /* Добавляем подчеркивание при наведении */
+}
+
+/* Адаптивные стили для мобильных устройств */
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+
+    .emotes-table th, .emotes-table td {
+        padding: 10px;
+        font-size: 14px; /* Уменьшаем размер шрифта */
+    }
+
+    .emotes-table td img {
+        max-width: 50px; /* Уменьшаем ширину изображений на мобильных устройствах */
+    }
+
+    .emotes-table tr {
+        height: auto; /* Убираем фиксированную высоту строк */
+    }
+
+    .emotes-table th:nth-child(3), /* Третья колонка - название */
+    .emotes-table td:nth-child(3) {
+        max-width: 150px; /* Устанавливаем максимальную ширину для мобильных устройств */
+    }
 }
