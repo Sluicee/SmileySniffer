@@ -89,34 +89,39 @@ def download_json(channel):
 def run_flask():
     try:
         logger.info("Starting Flask server...")
+        print("Starting Flask server...")
         http_server = WSGIServer(('0.0.0.0', 5000), application)
         http_server.serve_forever()
     except Exception as e:
         logger.error(f"Error running Flask server: {e}")
+        print(f"Error running Flask server: {e}")
 
 def run_bot():
     try:
         logger.info("Starting bot...")
+        print("Starting bot...")
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
         bot = Bot()
         bot.run()
     except Exception as e:
         logger.error(f"Error running bot: {e}")
+        print(f"Error running bot: {e}")
 
 # Убедитесь, что код запуска бота работает правильно
 def start_bot_thread():
     try:
         logger.info("Starting bot thread...")
+        print("Starting bot thread...")
         bot_thread = Thread(target=run_bot)
         bot_thread.daemon = True  # Позволяет завершить поток при завершении основного процесса
         bot_thread.start()
     except Exception as e:
         logger.error(f"Error starting bot thread: {e}")
+        print(f"Error starting bot thread: {e}")
 
 # Запуск функции для старта бота
 start_bot_thread()
-
 if __name__ == '__main__':
     # Запускаем Flask-сервер в основном потоке
     run_flask()

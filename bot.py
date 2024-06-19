@@ -1,15 +1,13 @@
-# -*- coding: utf-8 -*-
-
 import os
 import helpers
 import json
 from dotenv import load_dotenv
 from twitchio.ext import commands
 import time
-import schedule
 import logging
 import tempfile
 import re
+import asyncio
 
 
 dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
@@ -39,14 +37,14 @@ class Bot(commands.Bot):
         super().__init__(token=OAUTH_TOKEN, prefix=PREFIX, initial_channels=CHANNELS)
         self.messages = []  # Список для хранения сообщений
         self.emotes = self.load_emotes()
-        schedule.every(1).minute.do(self.load_emotes)  # Выполняем функцию load_emotes каждую минуту
-        logging.info("BOT init")
+        logger.info("BOT init")
 
     async def event_ready(self):
         logger.info(f'Logged in as | {self.nick}')  # Вывод информации о входе в аккаунт
         print(f'Logged in as | {self.nick}')  # Вывод информации о входе в аккаунт
         logger.info(f'User id is | {self.user_id}')  # Вывод id пользователя
         print(f'User id is | {self.user_id}')  # Вывод id пользователя
+        self.loop.create_task(self.schedule_load_emotes())
 
     async def event_message(self, message):
         if message.echo:  # Проверка на наличие эхо
@@ -75,8 +73,6 @@ class Bot(commands.Bot):
     @commands.cooldown(rate=1, per=15, bucket=commands.Bucket.channel)
     @commands.command(name='emote')
     async def emotes(self, ctx: commands.Context, emote_name: str):
-        if not re.match(r'^[a-zA-Z]+$', emote_name):
-            return
         if emote_name == "uzyAnalProlapse":
             await ctx.channel.send(f'uzyAnalProlapse использован *ДАННЫЕ УДАЛЕНЫ* раз, Ранг: *ДАННЫЕ УДАЛЕНЫ*')
             return
@@ -146,6 +142,11 @@ class Bot(commands.Bot):
         print("Emotes reloaded")
         
         return emotes_array
+    
+    async def schedule_load_emotes(self):
+        while True:
+            await asyncio.sleep(90)  # Подождать 90 секунд перед вызовом
+            self.emotes = self.load_emotes()
         
     async def save_word(self, channel, word):  # Добавляем метод save_word
         try:
