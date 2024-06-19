@@ -36,7 +36,7 @@ class Bot(commands.Bot):
     def __init__(self):
         super().__init__(token=OAUTH_TOKEN, prefix=PREFIX, initial_channels=CHANNELS)
         self.messages = []  # Список для хранения сообщений
-        self.emotes = self.load_emotes()
+        self.emotes = helpers.load_emotes()
         logger.info("BOT init")
 
     async def event_ready(self):
@@ -107,7 +107,12 @@ class Bot(commands.Bot):
 
         except Exception as e:
             await ctx.channel.send(f'Произошла ошибка: {str(e)}')
-        
+    
+    @commands.cooldown(rate=1, per=15, bucket=commands.Bucket.channel)
+    @commands.command(name='top')
+    async def top(self, ctx: commands.Context):
+        await ctx.channel.send(f'Топ смайликов 7TV: https://emotes.sluicee.space/{ctx.channel.name}')
+     
     async def send_message(self, channel, message):
         channel_obj = self.get_channel(channel)
         if channel_obj:
@@ -125,64 +130,10 @@ class Bot(commands.Bot):
             logger.error(f"Channel {channel} not found.")
             print(f"Channel {channel} not found.")
     
-    def load_emotes(self):
-        emotes_array = []  # Создаем пустой двумерный массив для хранения смайликов по каналам
-        for channel in UID7TV:
-            emotes_for_channel = []  # Создаем пустой список для смайликов конкретного канала
-            
-            # Получаем смайлики для текущего канала
-            channel_emotes = helpers.get_emote_names(helpers.get_emotes(UID7TV[channel]))
-            
-            # Добавляем смайлики в список emotes_for_channel
-            emotes_for_channel.extend(channel_emotes)
-            
-            # Добавляем список смайликов текущего канала в двумерный массив
-            emotes_array.append(emotes_for_channel)
-            
-            try:
-                # Путь к файлу JSON для канала
-                channel_filename = f'{channel}.json'
-                channel_file_path = os.path.join(DATA_DIR, channel_filename)
-                
-                # Загрузка данных из файла JSON
-                if os.path.exists(channel_file_path):
-                    with open(channel_file_path, 'r', encoding='utf-8') as file:
-                        data = json.load(file)
-                else:
-                    data = {}
-                
-                # Оставляем только ключи, которые есть в emotes_for_channel
-                keys_to_keep = set(emotes_for_channel)
-                data = {key: value for key, value in data.items() if key in keys_to_keep}
-                
-                # Записываем обновленные данные во временный файл
-                temp_file_path = None
-                try:
-                    with tempfile.NamedTemporaryFile('w', delete=False, dir=DATA_DIR, suffix='.tmp', encoding='utf-8') as temp_file:
-                        temp_file_path = temp_file.name
-                        json.dump(data, temp_file, indent=4)
-                    
-                    # После успешной записи во временный файл, заменяем основной файл
-                    os.replace(temp_file_path, channel_file_path)
-                    print(f'Successfully updated {channel_filename}')
-                    
-                except Exception as e:
-                    if temp_file_path and os.path.exists(temp_file_path):
-                        os.remove(temp_file_path)
-                    raise e
-            
-            except Exception as e:
-                print(f'Error updating {channel_filename}: {e}')
-            
-        logger.info("Emotes reloaded")
-        print("Emotes reloaded")
-        
-        return emotes_array
-    
     async def schedule_load_emotes(self):
         while True:
             await asyncio.sleep(90)  # Подождать 90 секунд перед вызовом
-            self.emotes = self.load_emotes()
+            self.emotes = helpers.load_emotes()
         
     async def save_word(self, channel, word):  # Добавляем метод save_word
         try:

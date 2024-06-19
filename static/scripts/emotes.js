@@ -1,6 +1,14 @@
-// Получение эмодзи с канала и их отображение в таблице
+let firstLoadCompleted = false; // Флаг для отслеживания первой загрузки
+
 async function fetchEmotes() {
     try {
+        const loadingOverlay = document.getElementById('loading-overlay');
+        
+        // Показываем анимацию загрузки только при первой загрузке
+        if (!firstLoadCompleted) {
+            loadingOverlay.style.display = 'block'; // Показать анимацию загрузки
+        }
+        
         const response = await fetch(`${channelName}/emotes`);
         if (!response.ok) {
             throw new Error('Failed to fetch emotes');
@@ -65,6 +73,12 @@ async function fetchEmotes() {
                 }
             });
         });
+
+        // Скрываем анимацию загрузки только после первой загрузки
+        if (!firstLoadCompleted) {
+            loadingOverlay.style.display = 'none'; // Скрыть анимацию загрузки
+            firstLoadCompleted = true; // Устанавливаем флаг, что первая загрузка завершена
+        }
 
         return emotes;
     } catch (error) {

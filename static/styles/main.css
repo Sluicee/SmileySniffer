@@ -186,6 +186,37 @@ body {
     text-decoration: underline; /* Добавляем подчеркивание при наведении */
 }
 
+#loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: none; /* Скрыть по умолчанию */
+    z-index: 1000; /* Выше всех остальных элементов */
+}
+
+.spinner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 50px;
+    height: 50px;
+    margin-top: -25px; /* Смещение спиннера на половину его высоты и ширины */
+    margin-left: -25px;
+    border-radius: 50%;
+    border: 3px solid rgba(0, 0, 0, 0.3);
+    border-top-color: #ffffff; /* Цвет верхней границы */
+    animation: spin 1s linear infinite; /* Анимация вращения */
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+
 
 /* Адаптивные стили для мобильных устройств */
 @media (max-width: 768px) {
