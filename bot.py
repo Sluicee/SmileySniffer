@@ -138,6 +138,42 @@ class Bot(commands.Bot):
             
             # Добавляем список смайликов текущего канала в двумерный массив
             emotes_array.append(emotes_for_channel)
+            
+            try:
+                # Путь к файлу JSON для канала
+                channel_filename = f'{channel}.json'
+                channel_file_path = os.path.join(DATA_DIR, channel_filename)
+                
+                # Загрузка данных из файла JSON
+                if os.path.exists(channel_file_path):
+                    with open(channel_file_path, 'r', encoding='utf-8') as file:
+                        data = json.load(file)
+                else:
+                    data = {}
+                
+                # Оставляем только ключи, которые есть в emotes_for_channel
+                keys_to_keep = set(emotes_for_channel)
+                data = {key: value for key, value in data.items() if key in keys_to_keep}
+                
+                # Записываем обновленные данные во временный файл
+                temp_file_path = None
+                try:
+                    with tempfile.NamedTemporaryFile('w', delete=False, dir=DATA_DIR, suffix='.tmp', encoding='utf-8') as temp_file:
+                        temp_file_path = temp_file.name
+                        json.dump(data, temp_file, indent=4)
+                    
+                    # После успешной записи во временный файл, заменяем основной файл
+                    os.replace(temp_file_path, channel_file_path)
+                    print(f'Successfully updated {channel_filename}')
+                    
+                except Exception as e:
+                    if temp_file_path and os.path.exists(temp_file_path):
+                        os.remove(temp_file_path)
+                    raise e
+            
+            except Exception as e:
+                print(f'Error updating {channel_filename}: {e}')
+            
         logger.info("Emotes reloaded")
         print("Emotes reloaded")
         
