@@ -65,9 +65,9 @@ def get_channel(channel_name):
         return "Чат не найден", 404
 
 @application.route('/<channel_name>/emotes', methods=['GET'])
-def get_emotes_by_channel(channel_name):
+async def get_emotes_by_channel(channel_name):
     if channel_name in CHANNELS:
-        data = jsonify(list(helpers.get_emotes(UID7TV[channel_name])))
+        data = jsonify(list(await helpers.get_emotes(UID7TV[channel_name])))
         return data
     else:
         return "Emotes не найдены", 404
