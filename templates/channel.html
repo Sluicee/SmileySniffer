@@ -45,7 +45,5 @@
             window.location.href = `/${selectedChannel}`;
         }
     </script>
-    {% assets "emotes_js" %}
-        <script src="{{ url_for('static', filename='scripts/emotes.js') }}"></script>
-    {% endassets %}
+    <script src="{{ url_for('static', filename='scripts/emotes.js') }}"></script>
 {% endblock %}

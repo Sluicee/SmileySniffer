@@ -6,9 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Default Title{% endblock %}</title>
     {% block head %}{% endblock %}
-    {% assets "main_css" %}
-        <link rel="stylesheet" href="{{ url_for('static', filename='styles/main.css') }}">
-    {% endassets %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/main.css') }}">
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
 	<link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
 </head>
@@ -16,8 +14,6 @@
     {% block content %}{% endblock %}
 
 
-    {% assets "main_js" %}
-        <script src="{{ url_for('static', filename='scripts/main.js') }}"></script>
-    {% endassets %}
+    <script src="{{ url_for('static', filename='scripts/main.js') }}"></script>
 </body>
 </html>

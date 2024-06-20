@@ -1,15 +1,12 @@
 import os
 import helpers
-from flask import Flask, request, jsonify, render_template, send_file
-from gevent.pywsgi import WSGIServer
+from quart import Quart, jsonify, render_template
 from dotenv import load_dotenv
-from flask_assets import Environment, Bundle
 from bot import Bot
 import json
 import logging
 from threading import Thread
 import asyncio
-
 
 dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
 if os.path.exists(dotenv_path):
@@ -19,7 +16,8 @@ if os.path.exists(dotenv_path):
 try:
     if not os.path.exists('logs'):
         os.makedirs('logs')
-    logging.basicConfig(level=logging.INFO, filename="logs/py_log.log", filemode="w", encoding='utf-8', format="%(asctime)s %(levelname)s %(message)s")
+    logging.basicConfig(level=logging.INFO, filename="logs/py_log.log", filemode="w", encoding='utf-8',
+                        format="%(asctime)s %(levelname)s %(message)s")
     logger = logging.getLogger('flask_app')
     logger.info("Starting server and bot")
 except Exception as e:
@@ -35,47 +33,47 @@ for item in items:
         key = parts[0].strip().lower()
         value = parts[1].strip().lower()
         UID7TV[key] = value
+
 CHANNELS = os.getenv('CHANNELS').split(',')
 CHANNELS = [channel.strip().lower() for channel in CHANNELS]
 DATA_DIR = os.getenv('DATA_DIR')
 
-application = Flask(__name__)
+application = Quart(__name__, static_folder='static')
 application.config['ASSETS_DEBUG'] = True
 application.debug = True
 
-assets = Environment(application)
-assets.register('main_css', Bundle('styles/main.css', output='gen/main.css'))
-assets.register('main_js', Bundle('scripts/main.js', output='gen/main.js'))
-assets.register('index_js', Bundle('scripts/main.js', output='gen/main.js'))
-assets.register('emotes_js', Bundle('scripts/main.js', output='gen/main.js'))
 
 @application.route('/')
-def index():
-    return render_template('index.html')
+async def index():
+    return await render_template('index.html')
+
 
 @application.route('/channels', methods=['GET'])
-def get_channels():
-    return CHANNELS
+async def get_channels():
+    return jsonify(CHANNELS)
+
 
 @application.route('/<channel_name>')
-def get_channel(channel_name):
+async def get_channel(channel_name):
     if channel_name in CHANNELS:
-        return render_template('channel.html', channel_name=channel_name, channels=CHANNELS)
+        return await render_template('channel.html', channel_name=channel_name, channels=CHANNELS)
     else:
         return "Чат не найден", 404
 
+
 @application.route('/<channel_name>/emotes', methods=['GET'])
-def get_emotes_by_channel(channel_name):
-    if channel_name in CHANNELS:
-        data = jsonify(list(helpers.get_emotes(UID7TV[channel_name])))
-        return data
+async def get_emotes_by_channel(channel_name):
+    if channel_name in UID7TV:
+        emotes = await helpers.get_emotes(UID7TV[channel_name])
+        return jsonify(list(emotes))
     else:
         return "Emotes не найдены", 404
 
+
 @application.route('/download/<channel>.json', methods=['GET'])
-def download_json(channel):
+async def download_json(channel):
     channel_file_path = os.path.join(DATA_DIR, f'{channel}.json')
-    
+
     if os.path.exists(channel_file_path):
         try:
             with open(channel_file_path, 'r') as file:
@@ -86,15 +84,6 @@ def download_json(channel):
     else:
         return jsonify({'status': 'File not found'}), 404
 
-def run_flask():
-    try:
-        logger.info("Starting Flask server...")
-        print("Starting Flask server...")
-        http_server = WSGIServer(('0.0.0.0', 5000), application)
-        http_server.serve_forever()
-    except Exception as e:
-        logger.error(f"Error running Flask server: {e}")
-        print(f"Error running Flask server: {e}")
 
 def run_bot():
     try:
@@ -108,6 +97,7 @@ def run_bot():
         logger.error(f"Error running bot: {e}")
         print(f"Error running bot: {e}")
 
+
 # Убедитесь, что код запуска бота работает правильно
 def start_bot_thread():
     try:
@@ -120,8 +110,20 @@ def start_bot_thread():
         logger.error(f"Error starting bot thread: {e}")
         print(f"Error starting bot thread: {e}")
 
+
 # Запуск функции для старта бота
 start_bot_thread()
+
 if __name__ == '__main__':
-    # Запускаем Flask-сервер в основном потоке
-    run_flask()
+    try:
+        from hypercorn.asyncio import serve
+
+        logger.info("Starting Quart server...")
+        print("Starting Quart server...")
+        loop = asyncio.get_event_loop()
+        loop.create_task(application.run_task(host='0.0.0.0', port=5000))
+        loop.run_forever()
+    except Exception as e:
+        logger.error(f"Error running Quart server: {e}")
+        print(f"Error running Quart server: {e}")
+
