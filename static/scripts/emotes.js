@@ -1,10 +1,12 @@
 let firstLoadCompleted = false; // Флаг для отслеживания первой загрузки
+let searchTerm = ''; // Переменная для хранения текущего поискового запроса
+let intervalId = null; // Переменная для хранения ID интервала
 
 async function fetchEmotes() {
     try {
         const loadingOverlay = document.getElementById('loading-overlay');
         
-        // Показываем анимацию загрузки только при первой загрузке
+        // Показываем анимацию загрузки только при первой загрузке или при регулярном обновлении
         if (!firstLoadCompleted) {
             loadingOverlay.style.display = 'block'; // Показать анимацию загрузки
         }
@@ -60,8 +62,20 @@ async function fetchEmotes() {
         // Добавляем обработчик события для поля поиска
         const searchInput = document.getElementById('searchInput');
         searchInput.addEventListener('input', () => {
-            const searchTerm = searchInput.value.trim().toLowerCase();
+            searchTerm = searchInput.value.trim().toLowerCase();
+            
+            // Если активный поисковый запрос, останавливаем периодическое обновление данных
+            if (searchTerm !== '') {
+                clearInterval(intervalId);
+                intervalId = null;
+            } else {
+                // Восстанавливаем периодическое обновление данных, если было остановлено
+                if (intervalId === null) {
+                    intervalId = setInterval(fetchEmotes, 30000);
+                }
+            }
 
+            // Фильтрация и отображение эмодзи в таблице
             emotes.forEach((emt, index) => {
                 const emoteName = emt.name.toLowerCase();
                 const tr = emotesTableBody.childNodes[index];
@@ -74,7 +88,7 @@ async function fetchEmotes() {
             });
         });
 
-        // Скрываем анимацию загрузки только после первой загрузки
+        // Скрываем анимацию загрузки только после первой загрузки или при регулярном обновлении
         if (!firstLoadCompleted) {
             loadingOverlay.style.display = 'none'; // Скрыть анимацию загрузки
             firstLoadCompleted = true; // Устанавливаем флаг, что первая загрузка завершена
@@ -89,5 +103,5 @@ async function fetchEmotes() {
 
 document.addEventListener('DOMContentLoaded', () => {
     fetchEmotes();
+    intervalId = setInterval(fetchEmotes, 30000); // Запускаем первый раз периодическое обновление данных
 });
-setInterval(fetchEmotes, 30000);

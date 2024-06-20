@@ -9,7 +9,6 @@ import tempfile
 import re
 import asyncio
 
-
 dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
 if os.path.exists(dotenv_path):
     load_dotenv(dotenv_path)
@@ -36,7 +35,7 @@ class Bot(commands.Bot):
     def __init__(self):
         super().__init__(token=OAUTH_TOKEN, prefix=PREFIX, initial_channels=CHANNELS)
         self.messages = []  # Список для хранения сообщений
-        self.emotes = helpers.load_emotes()
+        self.emotes = [[] for _ in CHANNELS]
         logger.info("BOT init")
 
     async def event_ready(self):
@@ -44,6 +43,7 @@ class Bot(commands.Bot):
         print(f'Logged in as | {self.nick}')  # Вывод информации о входе в аккаунт
         logger.info(f'User id is | {self.user_id}')  # Вывод id пользователя
         print(f'User id is | {self.user_id}')  # Вывод id пользователя
+        self.emotes = await helpers.load_emotes()
         self.loop.create_task(self.schedule_load_emotes())
 
     async def event_message(self, message):
@@ -59,7 +59,7 @@ class Bot(commands.Bot):
         })
 
         logger.debug(f'{message.author.name}: {message.content}')  # Вывод сообщений в консоль
-        print(f'{message.author.name}: {message.content}')  # Вывод сообщений в консоль
+        #print(f'{message.author.name}: {message.content}')  # Вывод сообщений в консоль
         
         if "@SmileySniffer привет" == message.content:
             await self.echo_msg(message.channel.name, "привет :)")
@@ -72,7 +72,7 @@ class Bot(commands.Bot):
         
     @commands.cooldown(rate=1, per=15, bucket=commands.Bucket.channel)
     @commands.command(name='emote')
-    async def emotes(self, ctx: commands.Context, emote_name: str):
+    async def fetch_emotes_command(self, ctx: commands.Context, emote_name: str):
         if emote_name == "uzyAnalProlapse":
             await ctx.channel.send(f'uzyAnalProlapse использован *ДАННЫЕ УДАЛЕНЫ* раз, Ранг: *ДАННЫЕ УДАЛЕНЫ*')
             return
@@ -130,11 +130,14 @@ class Bot(commands.Bot):
             logger.error(f"Channel {channel} not found.")
             print(f"Channel {channel} not found.")
     
+    async def load_emotes_task(self):
+        self.emotes = await helpers.load_emotes()
+        
     async def schedule_load_emotes(self):
         while True:
-            await asyncio.sleep(90)  # Подождать 90 секунд перед вызовом
-            self.emotes = helpers.load_emotes()
-        
+            await asyncio.sleep(300)  # Подождать 300 секунд перед вызовом
+            self.emotes = asyncio.create_task(self.load_emotes_task())
+    
     async def save_word(self, channel, word):  # Добавляем метод save_word
         try:
             # Создаем имя JSON файла для данного канала
@@ -170,3 +173,4 @@ class Bot(commands.Bot):
         except Exception as e:
             logger.error('Error saving word: %s', str(e))
             print('Error saving word:', str(e))
+
