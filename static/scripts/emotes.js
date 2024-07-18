@@ -44,7 +44,8 @@ async function fetchEmotes() {
 
             const imgTd = document.createElement('td');
             const img = document.createElement('img');
-            img.src = emt.data["host"]["url"] + "/" + emt.data["host"]["files"][3]["name"];
+            img.classList.add('lazy');
+            img.dataset.src = emt.data["host"]["url"] + "/" + emt.data["host"]["files"][3]["name"];
             imgTd.appendChild(img);
             tr.appendChild(imgTd);
 
@@ -61,32 +62,8 @@ async function fetchEmotes() {
 
         // Добавляем обработчик события для поля поиска
         const searchInput = document.getElementById('searchInput');
-        searchInput.addEventListener('input', () => {
-            searchTerm = searchInput.value.trim().toLowerCase();
-            
-            // Если активный поисковый запрос, останавливаем периодическое обновление данных
-            if (searchTerm !== '') {
-                clearInterval(intervalId);
-                intervalId = null;
-            } else {
-                // Восстанавливаем периодическое обновление данных, если было остановлено
-                if (intervalId === null) {
-                    intervalId = setInterval(fetchEmotes, 30000);
-                }
-            }
-
-            // Фильтрация и отображение эмодзи в таблице
-            emotes.forEach((emt, index) => {
-                const emoteName = emt.name.toLowerCase();
-                const tr = emotesTableBody.childNodes[index];
-
-                if (emoteName.includes(searchTerm)) {
-                    tr.style.display = ''; // Показываем строку, если она соответствует поисковому запросу
-                } else {
-                    tr.style.display = 'none'; // Скрываем строку, если она не соответствует
-                }
-            });
-        });
+        searchInput.removeEventListener('input', handleSearch);
+        searchInput.addEventListener('input', handleSearch);
 
         // Скрываем анимацию загрузки только после первой загрузки или при регулярном обновлении
         if (!firstLoadCompleted) {
@@ -94,11 +71,57 @@ async function fetchEmotes() {
             firstLoadCompleted = true; // Устанавливаем флаг, что первая загрузка завершена
         }
 
+        // Инициализируем ленивую загрузку изображений
+        const lazyLoadImages = document.querySelectorAll("img.lazy");
+
+        const imageObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const image = entry.target;
+                    image.src = image.dataset.src;
+                    image.classList.remove("lazy");
+                    observer.unobserve(image);
+                }
+            });
+        });
+
+        lazyLoadImages.forEach(image => {
+            imageObserver.observe(image);
+        });
+
         return emotes;
     } catch (error) {
         console.error('Error occurred while fetching emotes:', error);
         return [];
     }
+}
+
+function handleSearch() {
+    searchTerm = this.value.trim().toLowerCase();
+    
+    // Если активный поисковый запрос, останавливаем периодическое обновление данных
+    if (searchTerm !== '') {
+        clearInterval(intervalId);
+        intervalId = null;
+    } else {
+        // Восстанавливаем периодическое обновление данных, если было остановлено
+        if (intervalId === null) {
+            intervalId = setInterval(fetchEmotes, 30000);
+        }
+    }
+
+    // Фильтрация и отображение эмодзи в таблице
+    const emotesTableBody = document.querySelector('#emotes-table tbody');
+    const rows = emotesTableBody.querySelectorAll('tr');
+    
+    rows.forEach(row => {
+        const emoteName = row.querySelector('td:nth-child(3)').textContent.toLowerCase();
+        if (emoteName.includes(searchTerm)) {
+            row.style.display = ''; // Показываем строку, если она соответствует поисковому запросу
+        } else {
+            row.style.display = 'none'; // Скрываем строку, если она не соответствует
+        }
+    });
 }
 
 document.addEventListener('DOMContentLoaded', () => {

@@ -51,7 +51,7 @@ assets.register('emotes_js', Bundle('scripts/main.js', output='gen/main.js'))
 
 @application.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('index.html', avatars = helpers.get_avatars())
 
 @application.route('/channels', methods=['GET'])
 def get_channels():

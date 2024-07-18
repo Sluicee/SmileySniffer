@@ -135,7 +135,7 @@ class Bot(commands.Bot):
         
     async def schedule_load_emotes(self):
         while True:
-            await asyncio.sleep(300)  # Подождать 300 секунд перед вызовом
+            await asyncio.sleep(3600)  # Подождать 21600 секунд перед вызовом
             self.emotes = asyncio.create_task(self.load_emotes_task())
     
     async def save_word(self, channel, word):  # Добавляем метод save_word

@@ -65,10 +65,20 @@ body {
     background-color: #ffffff; /* Возвращаем стандартный фон */
 }
 
-.emotes-table-wrapper {
+.emotes-table-wrapper,
+.channels-list-wrapper {
     display: flex;
     justify-content: center; /* Центрируем таблицу */
     overflow-x: auto; /* Добавляем горизонтальную прокрутку */
+    margin-bottom: 20px; /* Добавляем отступ снизу */
+}
+
+.channels-table {
+    width: auto;
+    border-collapse: collapse; /* Убираем промежутки между ячейками */
+    border-radius: 8px; /* Закругленные углы */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Добавляем тень */
+    overflow: hidden; /* Прячем содержимое, выходящее за границы */
 }
 
 .emotes-table {
@@ -79,34 +89,48 @@ body {
     overflow: hidden; /* Прячем содержимое, выходящее за границы */
 }
 
-.emotes-table th, .emotes-table td {
+.emotes-table th, 
+.emotes-table td,
+.channels-table th,
+.channels-table td {
     padding: 15px;
     text-align: left;
 }
 
-.emotes-table th {
+.emotes-table th, 
+.channels-table th {
     background-color: #212121; /* Черный цвет фона заголовка */
     color: #ffffff; /* Белый цвет текста заголовка */
     text-transform: uppercase; /* Заглавные буквы */
     letter-spacing: 1px; /* Добавляем межбуквенный интервал */
 }
 
-.emotes-table td {
+.emotes-table td,
+.channels-table td {
     color: #ffffff; /* Темный цвет текста ячеек */
 }
 
+.channels-table td img {
+    width: 80px;
+    height: auto; /* Позволяет изображению сохранять пропорции */
+    border-radius: 5px; /* Закругленные углы для изображений */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Добавляем тень для изображений */
+}
+
 .emotes-table th:nth-child(3),
-.emotes-table td:nth-child(3) {
+.emotes-table td:nth-child(3){
     max-width: 450px; /* Установите нужную максимальную ширину */
     word-wrap: break-word; /* Разрешить перенос слов */
     white-space: normal; /* Позволить перенос строк */
 }
 
-.emotes-table tr:nth-child(even) {
+.emotes-table tr:nth-child(even),
+.channels-table tr:nth-child(even) {
     background-color: #030303; /* Светло-серый фон для четных строк */
 }
 
-.emotes-table tr:nth-child(odd) {
+.emotes-table tr:nth-child(odd),
+.channels-table tr:nth-child(odd) {
     background-color: #131313; /* Серый фон для нечетных строк */
 }
 
@@ -117,7 +141,8 @@ body {
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Добавляем тень для изображений */
 }
 
-.emotes-table tr {
+.emotes-table tr,
+.channels-table tr {
     height: 80px; /* Устанавливаем фиксированную высоту строк */
 }
 
@@ -132,53 +157,8 @@ body {
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-.channels-list-wrapper {
-    display: flex;
-    justify-content: center; /* Центрируем таблицу */
-    overflow-x: auto; /* Добавляем горизонтальную прокрутку */
-    margin-bottom: 20px; /* Добавляем отступ снизу */
-}
-
-.channels-table {
-    width: 100%;
-    border-collapse: collapse; /* Убираем промежутки между ячейками */
-    background-color: #ffffff;
-    border-radius: 8px; /* Закругленные углы */
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Добавляем тень */
-    overflow: hidden; /* Прячем содержимое, выходящее за границы */
-}
-
-.channels-table th,
-.channels-table td {
-    padding: 15px;
-    text-align: left;
-}
-
-.channels-table th {
-    background-color: #212121; /* Черный цвет фона заголовка */
-    color: #ffffff; /* Белый цвет текста заголовка */
-    text-transform: uppercase; /* Заглавные буквы */
-    letter-spacing: 1px; /* Добавляем межбуквенный интервал */
-}
-
-.channels-table td {
-    color: #37474f; /* Темный цвет текста ячеек */
-}
-
-.channels-table tr:nth-child(even) {
-    background-color: #f5f5f5; /* Светло-серый фон для четных строк */
-}
-
-.channels-table tr:nth-child(odd) {
-    background-color: #e0e0e0; /* Серый фон для нечетных строк */
-}
-
-.channels-table tr {
-    height: 50px; /* Устанавливаем фиксированную высоту строк */
-}
-
 .channels-table td a {
-    color: #212121; /* Черный цвет текста ссылок */
+    color: #ffffff; /* Черный цвет текста ссылок */
     text-decoration: none; /* Убираем подчеркивание ссылок */
 }
 
@@ -216,29 +196,34 @@ body {
     }
 }
 
-
-
 /* Адаптивные стили для мобильных устройств */
 @media (max-width: 768px) {
     .container {
         padding: 10px;
     }
 
-    .emotes-table th, .emotes-table td {
+    .emotes-table th, 
+    .emotes-table td,
+    .channels-table th, 
+    .channels-table td {
         padding: 10px;
         font-size: 14px; /* Уменьшаем размер шрифта */
     }
 
-    .emotes-table td img {
+    .emotes-table td img,
+    .channels-table td img {
         max-width: 50px; /* Уменьшаем ширину изображений на мобильных устройствах */
     }
 
-    .emotes-table tr {
+    .emotes-table tr,
+    .channels-table tr {
         height: auto; /* Убираем фиксированную высоту строк */
     }
 
     .emotes-table th:nth-child(3),
-    .emotes-table td:nth-child(3) {
+    .emotes-table td:nth-child(3),
+    .channels-table th:nth-child(3),
+    .channels-table td:nth-child(3) {
         max-width: 150px; /* Устанавливаем максимальную ширину для мобильных устройств */
     }
 }

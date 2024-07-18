@@ -24,6 +24,12 @@ CHANNELS = [channel.strip().lower() for channel in CHANNELS]
 env_value = os.getenv("UID7TV")
 items = env_value.split(",") if env_value else []
 UID7TV = {}
+for item in items:
+    parts = item.split("=")
+    if len(parts) == 2:
+        key = parts[0].strip().lower()
+        value = parts[1].strip().lower()
+        UID7TV[key] = value
 DATA_DIR = os.getenv('DATA_DIR')
 
 for item in items:
@@ -66,6 +72,14 @@ async def load_emotes():
     print("Emotes reloaded")
     
     return emotes_array
+
+def get_avatars():
+    avatars = []
+    for channel in CHANNELS:
+        url = API_URL_7TV + USERS_7TV_API + UID7TV[channel]
+        response = requests.get(url)
+        avatars.append(response.json()['avatar_url'])
+    return avatars
 
 async def load_emotes_for_channel(channel):
     try:
