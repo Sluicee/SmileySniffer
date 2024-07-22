@@ -3,6 +3,7 @@ import helpers
 import json
 from dotenv import load_dotenv
 from twitchio.ext import commands
+from typing import Optional
 import time
 import logging
 import tempfile
@@ -27,6 +28,7 @@ for item in items:
         value = parts[1].strip().lower()
         UID7TV[key] = value
 DATA_DIR = os.getenv('DATA_DIR')
+TOP_COMMAND_MAX_LIST = os.getenv("TOP_COMMAND_MAX_LIST")
 
 logger = logging.getLogger('flask_app')
 
@@ -108,11 +110,36 @@ class Bot(commands.Bot):
         except Exception as e:
             await ctx.channel.send(f'Произошла ошибка: {str(e)}')
     
-    @commands.cooldown(rate=1, per=15, bucket=commands.Bucket.channel)
+    @commands.cooldown(rate=1, per=10, bucket=commands.Bucket.channel)
     @commands.command(name='top')
-    async def top(self, ctx: commands.Context):
-        await ctx.channel.send(f'Топ смайликов 7TV: https://emotes.sluicee.space/{ctx.channel.name}')
-     
+    async def top(self, ctx: commands.Context, amount:Optional[int]):
+        if amount is None:
+            await ctx.channel.send(f'Топ смайликов 7TV: https://emotes.sluicee.space/{ctx.channel.name} (SSL когда-нибудь куплю aga )')
+        else:
+            if amount <= TOP_COMMAND_MAX_LIST:
+                try:
+                    # Попытка получить имя канала через ctx.channel.name
+                    channel_name = ctx.channel.name
+                    channel_filename = f'{channel_name}.json'
+                    channel_file_path = os.path.join(DATA_DIR, channel_filename)
+
+                    if os.path.exists(channel_file_path):
+                        with open(channel_file_path, 'r', encoding='utf-8') as file:
+                            data = json.load(file)
+
+                        # Сортируем смайлики по количеству использований в убывающем порядке
+                        sorted_emotes = sorted(data.items(), key=lambda item: item[1], reverse=True)
+                        
+                        top_ranks = sorted_emotes[:amount]
+                        output = ""
+                        for i in top_ranks:
+                            output += str(top_ranks.index(i) + 1) + "." + " " + str(i[0]) + " " + "(" + str(i[1]) + ")" + " "
+                        await ctx.channel.send(f'Top {amount}: {output}')
+                    else:
+                        await ctx.channel.send(f'Канал "{channel_name}" не найден.')
+                except Exception as e:
+                    await ctx.channel.send(f'Произошла ошибка: {str(e)}')
+
     async def send_message(self, channel, message):
         channel_obj = self.get_channel(channel)
         if channel_obj:
@@ -120,7 +147,7 @@ class Bot(commands.Bot):
         else:
             logger.error(f"Channel {channel} not found.")
             print(f"Channel {channel} not found.")
-            
+ 
     @helpers.cooldown(7.5)
     async def echo_msg(self, channel, message):
         channel_obj = self.get_channel(channel)
@@ -164,7 +191,7 @@ class Bot(commands.Bot):
                 # После успешной записи во временный файл, заменяем основной файл
                 os.replace(temp_file_path, channel_file_path)
                 logger.debug('Word saved successfully')
-                print('Word saved successfully')
+                # print('Word saved successfully')
             except Exception as e:
                 if temp_file_path and os.path.exists(temp_file_path):
                     os.remove(temp_file_path)
