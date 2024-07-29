@@ -207,6 +207,16 @@ function sortTable(n) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Устанавливаем начальное состояние сортировки
+    const table = document.getElementById("emotes-table");
+    const headers = table.querySelectorAll("thead th");
+
+    // Устанавливаем сортировку по возрастанию для столбца "Ранг"
+    headers[0].classList.add('sort-asc');
+    table.dataset.sortDirection = 'asc';
+
+    sortTable(0)
+
     fetchEmotes();
-    intervalId = setInterval(fetchEmotes, 15000); // Запускаем первый раз периодическое обновление данных
+    intervalId = setInterval(fetchEmotes, 30000); // Запускаем первый раз периодическое обновление данных
 });
