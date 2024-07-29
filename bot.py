@@ -10,224 +10,194 @@ import tempfile
 import re
 import asyncio
 
+# Загрузка переменных окружения из файла .env
 dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
 if os.path.exists(dotenv_path):
     load_dotenv(dotenv_path)
-    
+
+# Инициализация переменных окружения
 OAUTH_TOKEN = os.getenv('OAUTH_TOKEN')
 PREFIX = os.getenv('PREFIX')
 CHANNELS = os.getenv('CHANNELS').split(',')
 CHANNELS = [channel.strip().lower() for channel in CHANNELS]
 env_value = os.getenv("UID7TV")
 items = env_value.split(",") if env_value else []
-UID7TV = {}
-for item in items:
-    parts = item.split("=")
-    if len(parts) == 2:
-        key = parts[0].strip().lower()
-        value = parts[1].strip().lower()
-        UID7TV[key] = value
+UID7TV = {item.split("=")[0].strip().lower(): item.split("=")[1].strip().lower() for item in items if "=" in item}
 DATA_DIR = os.getenv('DATA_DIR')
-TOP_COMMAND_MAX_LIST = int (os.getenv("TOP_COMMAND_MAX_LIST"))
+TOP_COMMAND_MAX_LIST = int(os.getenv("TOP_COMMAND_MAX_LIST"))
 
 logger = logging.getLogger('flask_app')
 
+
 class Bot(commands.Bot):
-    
+
     def __init__(self):
         super().__init__(token=OAUTH_TOKEN, prefix=PREFIX, initial_channels=CHANNELS)
         self.messages = []  # Список для хранения сообщений
-        self.emotes = [[] for _ in CHANNELS]
+        self.emotes = [[] for _ in CHANNELS]  # Список для хранения эмодзи для каждого канала
         logger.info("BOT init")
 
     async def event_ready(self):
-        logger.info(f'Logged in as | {self.nick}')  # Вывод информации о входе в аккаунт
-        print(f'Logged in as | {self.nick}')  # Вывод информации о входе в аккаунт
-        logger.info(f'User id is | {self.user_id}')  # Вывод id пользователя
-        print(f'User id is | {self.user_id}')  # Вывод id пользователя
-        self.emotes = await helpers.load_emotes()
-        self.loop.create_task(self.schedule_load_emotes())
+        """Вызывается при успешном подключении бота к Twitch."""
+        logger.info(f'Logged in as | {self.nick}')  # Логгирование имени пользователя
+        print(f'Logged in as | {self.nick}')  # Печать имени пользователя
+        logger.info(f'User id is | {self.user_id}')  # Логгирование id пользователя
+        print(f'User id is | {self.user_id}')  # Печать id пользователя
+        self.emotes = await helpers.load_emotes()  # Загрузка эмодзи
+        self.loop.create_task(self.schedule_load_emotes())  # Запуск задачи периодической загрузки эмодзи
 
     async def event_message(self, message):
-        if message.echo:  # Проверка на наличие эхо
+        """Обрабатывает входящие сообщения."""
+        if message.echo:  # Проверка на эхо-сообщение
             return
-        
+
         # Сохранение сообщений в список с временной меткой
         self.messages.append({
             'channel': message.channel.name,
             'author': message.author.name,
             'content': message.content,
-            'timestamp': time.time()  # Добавим временную метку
+            'timestamp': time.time()  # Добавление временной метки
         })
 
-        logger.debug(f'{message.author.name}: {message.content}')  # Вывод сообщений в консоль
-        #print(f'{message.author.name}: {message.content}')  # Вывод сообщений в консоль
-        
+        logger.debug(f'{message.author.name}: {message.content}')  # Логгирование сообщений
+
         if "@SmileySniffer привет" == message.content:
-            await self.echo_msg(message.channel.name, "привет :)")
-        
+            await self.echo_msg(message.channel.name, "привет :)")  # Отправка приветственного сообщения
+
+        # Проверка и сохранение слов, если они содержат эмодзи
         for word in message.content.split():
             if word in self.emotes[CHANNELS.index(message.channel.name)]:
                 await self.save_word(message.channel.name, word)
+
+        await self.handle_commands(message)  # Обработка команд
+
+    async def get_channel_data(self, channel_name):
+        """Вспомогательная функция для получения данных канала из файла."""
+        channel_filename = f'{channel_name}.json'
+        channel_file_path = os.path.join(DATA_DIR, channel_filename)
         
-        await self.handle_commands(message)
-        
-    @commands.cooldown(rate=1, per=10, bucket=commands.Bucket.channel)
-    @commands.command(name='emote')
-    async def fetch_emotes_command(self, ctx: commands.Context, emote_name: str):
-        if emote_name == "uzyAnalProlapse":
-            await ctx.channel.send(f'uzyAnalProlapse использован *ДАННЫЕ УДАЛЕНЫ* раз, Ранг: *ДАННЫЕ УДАЛЕНЫ*')
-            return
+        if os.path.exists(channel_file_path):
+            with open(channel_file_path, 'r', encoding='utf-8') as file:
+                data = json.load(file)
+            return data
+        else:
+            return None
+
+    async def send_channel_emotes(self, ctx, amount, order='desc'):
+        """Отправка эмодзи канала в чат."""
         try:
-            # Попытка получить имя канала через ctx.channel.name
             channel_name = ctx.channel.name
-            channel_filename = f'{channel_name}.json'
-            channel_file_path = os.path.join(DATA_DIR, channel_filename)
-
-            if os.path.exists(channel_file_path):
-                with open(channel_file_path, 'r', encoding='utf-8') as file:
-                    data = json.load(file)
-
-                # Сортируем смайлики по количеству использований в убывающем порядке
-                sorted_emotes = sorted(data.items(), key=lambda item: item[1], reverse=True)
-                
-                # Поиск ранга смайлика
-                emote_rank = next((rank for rank, (name, _) in enumerate(sorted_emotes, start=1) if name == emote_name), None)
-
-                if emote_name in data:
-                    emote_value = data[emote_name]
-                    times_word = helpers.get_times_word(emote_value)
-                    if emote_rank is not None:
-                        await ctx.channel.send(f'{emote_name} использован {emote_value} {times_word}, Ранг: {emote_rank}')
-                    else:
-                        await ctx.channel.send(f'{emote_name} использован {emote_value} {times_word}')
-                else:
-                    return
-                    # await ctx.channel.send(f'{emote_name} не найден')
+            data = await self.get_channel_data(channel_name)
+            
+            if data:
+                emotes_list = list(data.items())
+                sorted_emotes = sorted(emotes_list, key=lambda item: item[1], reverse=(order == 'desc'))
+                selected_emotes = sorted_emotes[:amount]
+                output = " ".join([f"{idx + 1}. {emote[0]} ({emote[1]})" for idx, emote in enumerate(selected_emotes)])
+                await ctx.channel.send(f'{"Top" if order == "desc" else "Последние"} {amount}: {output}')
             else:
                 await ctx.channel.send(f'Канал "{channel_name}" не найден.')
 
         except Exception as e:
             await ctx.channel.send(f'Произошла ошибка: {str(e)}')
-    
+
+    @commands.cooldown(rate=1, per=5, bucket=commands.Bucket.channel)
+    @commands.command(name='emote')
+    async def fetch_emotes_command(self, ctx: commands.Context, emote_name: str):
+        """Команда для получения информации о конкретной эмодзи."""
+        if emote_name == "uzyAnalProlapse":
+            await ctx.channel.send(f'uzyAnalProlapse использован *ДАННЫЕ УДАЛЕНЫ* раз, Ранг: *ДАННЫЕ УДАЛЕНЫ*')
+            return
+        try:
+            channel_name = ctx.channel.name
+            data = await self.get_channel_data(channel_name)
+
+            if data:
+                sorted_emotes = sorted(data.items(), key=lambda item: item[1], reverse=True)
+                emote_rank = next((rank for rank, (name, _) in enumerate(sorted_emotes, start=1) if name == emote_name), None)
+
+                if emote_name in data:
+                    emote_value = data[emote_name]
+                    times_word = helpers.get_times_word(emote_value)
+                    rank_message = f', Ранг: {emote_rank}' if emote_rank is not None else ''
+                    await ctx.channel.send(f'{emote_name} использован {emote_value} {times_word}{rank_message}')
+                else:
+                    return
+            else:
+                await ctx.channel.send(f'Канал "{channel_name}" не найден.')
+
+        except Exception as e:
+            await ctx.channel.send(f'Произошла ошибка: {str(e)}')
+
     @commands.cooldown(rate=1, per=10, bucket=commands.Bucket.channel)
     @commands.command(name='top')
-    async def top(self, ctx: commands.Context, amount:Optional[int]):
+    async def top(self, ctx: commands.Context, amount: Optional[int]):
+        """Команда для получения топа эмодзи."""
         if amount is None:
             await ctx.channel.send(f'Топ смайликов 7TV: https://emotes.sluicee.space/{ctx.channel.name} (SSL когда-нибудь куплю aga )')
-        else:
-            if amount <= TOP_COMMAND_MAX_LIST:
-                try:
-                    # Попытка получить имя канала через ctx.channel.name
-                    channel_name = ctx.channel.name
-                    channel_filename = f'{channel_name}.json'
-                    channel_file_path = os.path.join(DATA_DIR, channel_filename)
-
-                    if os.path.exists(channel_file_path):
-                        with open(channel_file_path, 'r', encoding='utf-8') as file:
-                            data = json.load(file)
-
-                        # Сортируем смайлики по количеству использований в убывающем порядке
-                        sorted_emotes = sorted(data.items(), key=lambda item: item[1], reverse=True)
-                        
-                        top_ranks = sorted_emotes[:amount]
-                        output = ""
-                        for i in top_ranks:
-                            output += str(top_ranks.index(i) + 1) + "." + " " + str(i[0]) + " " + "(" + str(i[1]) + ")" + " "
-                        await ctx.channel.send(f'Top {amount}: {output}')
-                    else:
-                        await ctx.channel.send(f'Канал "{channel_name}" не найден.')
-                except Exception as e:
-                    await ctx.channel.send(f'Произошла ошибка: {str(e)}')
+        elif amount <= TOP_COMMAND_MAX_LIST:
+            await self.send_channel_emotes(ctx, amount, order='desc')
 
     @commands.cooldown(rate=1, per=10, bucket=commands.Bucket.channel)
     @commands.command(name='last')
-    async def latest(self, ctx: commands.Context, amount: Optional[int] = 10):
+    async def latest(self, ctx: commands.Context, amount: Optional[int]):
+        """Команда для получения последних использованных эмодзи."""
         if amount is None:
             await ctx.channel.send(f'Последние смайлики 7TV: https://emotes.sluicee.space/{ctx.channel.name} (SSL когда-нибудь куплю aga )')
-        else:
-            if amount <= TOP_COMMAND_MAX_LIST:
-                try:
-                    # Попытка получить имя канала через ctx.channel.name
-                    channel_name = ctx.channel.name
-                    channel_filename = f'{channel_name}.json'
-                    channel_file_path = os.path.join(DATA_DIR, channel_filename)
+        elif amount <= TOP_COMMAND_MAX_LIST:
+            await self.send_channel_emotes(ctx, amount, order='asc')
 
-                    if os.path.exists(channel_file_path):
-                        with open(channel_file_path, 'r', encoding='utf-8') as file:
-                            data = json.load(file)
-
-                        # Преобразуем данные в список кортежей (имя смайлика, количество использований)
-                        emotes_list = list(data.items())
-
-                        # Сортируем смайлики по количеству использований в порядке возрастания
-                        sorted_emotes = sorted(emotes_list, key=lambda item: item[1])
-
-                        # Получаем первые X смайликов из отсортированного списка
-                        latest_emotes = sorted_emotes[:amount]
-
-                        output = ""
-                        for idx, emote in enumerate(latest_emotes):
-                            output += f"{idx + 1}. {emote[0]} ({emote[1]}) "
-                        
-                        await ctx.channel.send(f'Последние {amount} смайликов: {output}')
-                    else:
-                        await ctx.channel.send(f'Канал "{channel_name}" не найден.')
-                except Exception as e:
-                    await ctx.channel.send(f'Произошла ошибка: {str(e)}')
-        
     async def send_message(self, channel, message):
+        """Отправка сообщения в канал."""
         channel_obj = self.get_channel(channel)
         if channel_obj:
             await channel_obj.send(message)  # Отправка сообщения в чат
         else:
             logger.error(f"Channel {channel} not found.")
             print(f"Channel {channel} not found.")
- 
+
     @helpers.cooldown(7.5)
     async def echo_msg(self, channel, message):
+        """Отправка эхо-сообщения."""
         channel_obj = self.get_channel(channel)
         if channel_obj:
             await channel_obj.send(message)  # Отправка сообщения в чат
         else:
             logger.error(f"Channel {channel} not found.")
             print(f"Channel {channel} not found.")
-    
+
     async def load_emotes_task(self):
+        """Загрузка эмодзи."""
         self.emotes = await helpers.load_emotes()
-        
+
     async def schedule_load_emotes(self):
+        """Запланированная задача для периодической загрузки эмодзи."""
         while True:
-            await asyncio.sleep(3600)  # Подождать 21600 секунд перед вызовом
+            await asyncio.sleep(3600)  # Подождать 3600 секунд перед повторной загрузкой эмодзи
             self.emotes = asyncio.create_task(self.load_emotes_task())
-    
-    async def save_word(self, channel, word):  # Добавляем метод save_word
+
+    async def save_word(self, channel, word):
+        """Сохранение использованного слова в файл."""
         try:
-            # Создаем имя JSON файла для данного канала
             channel_filename = f'{channel}.json'
             channel_file_path = os.path.join(DATA_DIR, channel_filename)
-            
-            # Загружаем данные из существующего файла, если он существует
+
             data = {}
             if os.path.exists(channel_file_path):
                 with open(channel_file_path, 'r', encoding='utf-8') as file:
                     data = json.load(file)
-            
-            # Обновляем данные
+
             data[word] = data.get(word, 0) + 1
 
-            # Записываем обновленные данные во временный файл
             temp_file_path = None
             try:
                 dir_name = os.path.dirname(channel_file_path)
                 with tempfile.NamedTemporaryFile('w', delete=False, dir=dir_name, suffix='.tmp', encoding='utf-8') as temp_file:
                     temp_file_path = temp_file.name
                     json.dump(data, temp_file, indent=4)
-            
-                # После успешной записи во временный файл, заменяем основной файл
+
                 os.replace(temp_file_path, channel_file_path)
                 logger.debug('Word saved successfully')
-                # print('Word saved successfully')
             except Exception as e:
                 if temp_file_path and os.path.exists(temp_file_path):
                     os.remove(temp_file_path)
@@ -236,4 +206,3 @@ class Bot(commands.Bot):
         except Exception as e:
             logger.error('Error saving word: %s', str(e))
             print('Error saving word:', str(e))
-
