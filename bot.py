@@ -28,7 +28,7 @@ for item in items:
         value = parts[1].strip().lower()
         UID7TV[key] = value
 DATA_DIR = os.getenv('DATA_DIR')
-TOP_COMMAND_MAX_LIST = os.getenv("TOP_COMMAND_MAX_LIST")
+TOP_COMMAND_MAX_LIST = int (os.getenv("TOP_COMMAND_MAX_LIST"))
 
 logger = logging.getLogger('flask_app')
 
@@ -72,7 +72,7 @@ class Bot(commands.Bot):
         
         await self.handle_commands(message)
         
-    @commands.cooldown(rate=1, per=15, bucket=commands.Bucket.channel)
+    @commands.cooldown(rate=1, per=10, bucket=commands.Bucket.channel)
     @commands.command(name='emote')
     async def fetch_emotes_command(self, ctx: commands.Context, emote_name: str):
         if emote_name == "uzyAnalProlapse":
