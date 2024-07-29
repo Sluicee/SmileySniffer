@@ -140,6 +140,42 @@ class Bot(commands.Bot):
                 except Exception as e:
                     await ctx.channel.send(f'Произошла ошибка: {str(e)}')
 
+    @commands.cooldown(rate=1, per=10, bucket=commands.Bucket.channel)
+    @commands.command(name='last')
+    async def latest(self, ctx: commands.Context, amount: Optional[int] = 10):
+        if amount is None:
+            await ctx.channel.send(f'Последние смайлики 7TV: https://emotes.sluicee.space/{ctx.channel.name} (SSL когда-нибудь куплю aga )')
+        else:
+            if amount <= TOP_COMMAND_MAX_LIST:
+                try:
+                    # Попытка получить имя канала через ctx.channel.name
+                    channel_name = ctx.channel.name
+                    channel_filename = f'{channel_name}.json'
+                    channel_file_path = os.path.join(DATA_DIR, channel_filename)
+
+                    if os.path.exists(channel_file_path):
+                        with open(channel_file_path, 'r', encoding='utf-8') as file:
+                            data = json.load(file)
+
+                        # Преобразуем данные в список кортежей (имя смайлика, количество использований)
+                        emotes_list = list(data.items())
+
+                        # Сортируем смайлики по количеству использований в порядке возрастания
+                        sorted_emotes = sorted(emotes_list, key=lambda item: item[1])
+
+                        # Получаем первые X смайликов из отсортированного списка
+                        latest_emotes = sorted_emotes[:amount]
+
+                        output = ""
+                        for idx, emote in enumerate(latest_emotes):
+                            output += f"{idx + 1}. {emote[0]} ({emote[1]}) "
+                        
+                        await ctx.channel.send(f'Последние {amount} смайликов: {output}')
+                    else:
+                        await ctx.channel.send(f'Канал "{channel_name}" не найден.')
+                except Exception as e:
+                    await ctx.channel.send(f'Произошла ошибка: {str(e)}')
+        
     async def send_message(self, channel, message):
         channel_obj = self.get_channel(channel)
         if channel_obj:
