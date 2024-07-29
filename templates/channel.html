@@ -21,10 +21,10 @@
             <table class="emotes-table" id="emotes-table">
                 <thead>
                     <tr>
-                        <th>Ранг</th>
+                        <th onclick="sortTable(0)">Ранг</th>
                         <th>Изображение</th>
-                        <th>Название</th>
-                        <th>Счетчик</th>
+                        <th onclick="sortTable(2)">Название</th>
+                        <th onclick="sortTable(3)">Счетчик</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -45,6 +45,7 @@
             window.location.href = `/${selectedChannel}`;
         }
     </script>
+    
     {% assets "emotes_js" %}
         <script src="{{ url_for('static', filename='scripts/emotes.js') }}"></script>
     {% endassets %}

@@ -146,6 +146,41 @@ body {
     height: 80px; /* Устанавливаем фиксированную высоту строк */
 }
 
+.emotes-table th {
+    cursor: pointer;
+    position: relative;
+    padding: 10px;
+    user-select: none; /* предотвращает выделение текста */
+    transition: background-color 0.3s ease;
+}
+
+.emotes-table th:hover:not(:nth-child(2)) {
+    background-color: #000000;
+}
+
+.emotes-table th.sort-asc::after {
+    content: "▲";
+    position: absolute;
+    right: 10px;
+    font-size: 12px;
+}
+
+.emotes-table th.sort-desc::after {
+    content: "▼";
+    position: absolute;
+    right: 10px;
+    font-size: 12px;
+}
+
+/* Исключаем эффект наведения и сортировки для столбца с изображениями */
+.emotes-table th:nth-child(2) {
+    cursor: default; /* Отключает указатель курсора */
+}
+
+.emotes-table td:nth-child(2) {
+    padding: 0; /* Убирает отступы для ячеек с изображениями */
+}
+
 .search-input {
     width: 100%;
     max-width: 300px; /* Ограничиваем ширину поля ввода */
