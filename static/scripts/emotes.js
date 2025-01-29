@@ -10,19 +10,16 @@ async function fetchEmotes() {
         if (!firstLoadCompleted) {
             loadingOverlay.style.display = 'block'; // Показать анимацию загрузки
         }
-        
-        const response = await fetch(`${channelName}/emotes`);
-        if (!response.ok) {
-            throw new Error('Failed to fetch emotes');
-        }
 
-        const responseJson = await fetch(`/download/${channelName}.json`);
-        if (!responseJson.ok) {
-            throw new Error('Network response was not ok ' + responseJson.statusText);
+        const responseStats = await fetch(`/api/${channelName}/stats`);
+        if (!responseStats.ok) {
+            throw new Error('Failed to fetch stats');
         }
-        const dataEmotesCount = await responseJson.json();
+        const dataEmotesCount = await responseStats.json();
 
-        const emotes = await response.json();
+        const responseEmotes = await fetch(`/${channelName}/emotes`);
+        if (!responseEmotes.ok) throw new Error('Ошибка загрузки эмодзи');
+        const emotes = await responseEmotes.json();
         console.log('Fetched Emotes:', emotes); // Отладочный вывод
 
         // Сортировка эмодзи по убыванию значений в dataEmotesCount
@@ -95,7 +92,7 @@ function updateEmotesTable(emotes, dataEmotesCount) {
             const imgTd = document.createElement('td');
             const img = document.createElement('img');
             img.classList.add('lazy');
-            img.dataset.src = emt.data["host"]["url"] + "/" + emt.data["host"]["files"][3]["name"];
+            img.dataset.src = emt.image_url;
             imgTd.appendChild(img);
             row.appendChild(imgTd);
 

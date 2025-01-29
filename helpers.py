@@ -60,7 +60,13 @@ async def get_7tv_emotes(channel_id):
 
 async def get_emotes(channel_id):
     emotes = await get_7tv_emotes(channel_id)
-    return emotes['emotes'] if 'emotes' in emotes else []
+    return [
+        {
+            "name": emote["name"],
+            "image_url": f'https://cdn.7tv.app/emote/{emote["id"]}/4x.webp'  # URL изображения
+        }
+        for emote in (emotes.get("emotes", []))
+    ] if emotes else []
 
 async def get_emote_names(emotes):
     return [emote['name'] for emote in emotes] if emotes else []

@@ -10,6 +10,7 @@ from threading import Thread
 import asyncio
 from config import application, db  # Импорт из config.py
 import json
+from models import Channel
 
 
 dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
@@ -64,10 +65,26 @@ def get_channel(channel_name):
 @application.route('/<channel_name>/emotes', methods=['GET'])
 async def get_emotes_by_channel(channel_name):
     if channel_name in CHANNELS:
-        data = jsonify(list(await helpers.get_emotes(UID7TV[channel_name])))
-        return data
+        try:
+            emotes = await helpers.get_emotes(helpers.UID7TV[channel_name])
+            return jsonify(emotes)  # Возвращаем список словарей
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
     else:
         return "Emotes не найдены", 404
+
+@application.route('/api/<channel_name>/stats')
+def get_channel_stats(channel_name):
+    try:
+        with application.app_context():
+            channel = Channel.query.filter_by(name=channel_name).first()
+            if not channel:
+                return jsonify({"error": "Channel not found"}), 404
+            
+            stats = {emote.name: emote.count for emote in channel.emotes}
+            return jsonify(stats)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 def run_flask():
     try:
