@@ -1,14 +1,13 @@
 import os
 import helpers
-import json
 from dotenv import load_dotenv
 from twitchio.ext import commands
 from typing import Optional
 import time
 import logging
-import tempfile
-import re
 import asyncio
+from models import Channel, Emote  # Импорт из models.py
+from config import application, db
 
 # Загрузка переменных окружения из файла .env
 dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
@@ -33,6 +32,7 @@ class Bot(commands.Bot):
 
     def __init__(self):
         super().__init__(token=OAUTH_TOKEN, prefix=PREFIX, initial_channels=CHANNELS)
+        self.application = application  # Сохраняем ссылку на приложение
         self.messages = []  # Список для хранения сообщений
         self.emotes = [[] for _ in CHANNELS]  # Список для хранения эмодзи для каждого канала
         logger.info("BOT init")
@@ -72,15 +72,11 @@ class Bot(commands.Bot):
         await self.handle_commands(message)  # Обработка команд
 
     async def get_channel_data(self, channel_name):
-        """Вспомогательная функция для получения данных канала из файла."""
-        channel_filename = f'{channel_name}.json'
-        channel_file_path = os.path.join(DATA_DIR, channel_filename)
-        
-        if os.path.exists(channel_file_path):
-            with open(channel_file_path, 'r', encoding='utf-8') as file:
-                data = json.load(file)
-            return data
-        else:
+        # Используем переданное приложение
+        with application.app_context():
+            channel = Channel.query.filter_by(name=channel_name).first()
+            if channel:
+                return {emote.name: emote.count for emote in channel.emotes}
             return None
 
     async def send_channel_emotes(self, ctx, amount, order='desc'):
@@ -99,7 +95,8 @@ class Bot(commands.Bot):
                 await ctx.channel.send(f'Канал "{channel_name}" не найден.')
 
         except Exception as e:
-            await ctx.channel.send(f'Произошла ошибка: {str(e)}')
+            logger.error(f'Произошла ошибка: {str(e)}')
+            await print(f'Произошла ошибка: {str(e)}')
 
     @commands.cooldown(rate=1, per=5, bucket=commands.Bucket.channel)
     @commands.command(name='emote')
@@ -127,7 +124,8 @@ class Bot(commands.Bot):
                 await ctx.channel.send(f'Канал "{channel_name}" не найден.')
 
         except Exception as e:
-            await ctx.channel.send(f'Произошла ошибка: {str(e)}')
+            logger.error(f'Произошла ошибка: {str(e)}')
+            await print(f'Произошла ошибка: {str(e)}')
 
     @commands.cooldown(rate=1, per=10, bucket=commands.Bucket.channel)
     @commands.command(name='top')
@@ -176,33 +174,25 @@ class Bot(commands.Bot):
             await asyncio.sleep(3600)  # Подождать 3600 секунд перед повторной загрузкой эмодзи
             self.emotes = asyncio.create_task(self.load_emotes_task())
 
-    async def save_word(self, channel, word):
-        """Сохранение использованного слова в файл."""
+    async def save_word(self, channel_name, word):
         try:
-            channel_filename = f'{channel}.json'
-            channel_file_path = os.path.join(DATA_DIR, channel_filename)
+            with self.application.app_context():
+                channel = Channel.query.filter_by(name=channel_name).first()
+                if not channel:
+                    channel = Channel(name=channel_name)
+                    db.session.add(channel)
+                    db.session.commit()
 
-            data = {}
-            if os.path.exists(channel_file_path):
-                with open(channel_file_path, 'r', encoding='utf-8') as file:
-                    data = json.load(file)
-
-            data[word] = data.get(word, 0) + 1
-
-            temp_file_path = None
-            try:
-                dir_name = os.path.dirname(channel_file_path)
-                with tempfile.NamedTemporaryFile('w', delete=False, dir=dir_name, suffix='.tmp', encoding='utf-8') as temp_file:
-                    temp_file_path = temp_file.name
-                    json.dump(data, temp_file, indent=4)
-
-                os.replace(temp_file_path, channel_file_path)
+                emote = Emote.query.filter_by(name=word, channel_id=channel.id).first()
+                if emote:
+                    emote.count += 1
+                else:
+                    emote = Emote(name=word, count=1, channel=channel)
+                    db.session.add(emote)
+                
+                db.session.commit()
                 logger.debug('Word saved successfully')
-            except Exception as e:
-                if temp_file_path and os.path.exists(temp_file_path):
-                    os.remove(temp_file_path)
-                raise e
-
+                
         except Exception as e:
             logger.error('Error saving word: %s', str(e))
             print('Error saving word:', str(e))

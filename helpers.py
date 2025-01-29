@@ -7,8 +7,8 @@ import asyncio
 from functools import wraps
 from dotenv import load_dotenv
 import logging
-import json
-import tempfile
+from config import application, db
+from models import Channel, Emote
 
 dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
 if os.path.exists(dotenv_path):
@@ -78,47 +78,37 @@ def get_avatars():
     for channel in CHANNELS:
         url = API_URL_7TV + USERS_7TV_API + UID7TV[channel]
         response = requests.get(url)
-        avatars.append(response.json()['avatar_url'])
+        if response.status_code == 200:
+            avatars.append(response.json()['avatar_url'])
+        else:
+            avatars.append(None)  # Или значение по умолчанию
     return avatars
 
 async def load_emotes_for_channel(channel):
     try:
-        channel_emotes = await get_emote_names(await get_emotes(UID7TV[channel]))
-        
-        # Путь к файлу JSON для канала
-        channel_filename = f'{channel}.json'
-        channel_file_path = os.path.join(DATA_DIR, channel_filename)
-        
-        # Загрузка данных из файла JSON
-        if os.path.exists(channel_file_path):
-            with open(channel_file_path, 'r', encoding='utf-8') as file:
-                data = json.load(file)
-        else:
-            data = {}
-        
-        # Оставляем только ключи, которые есть в emotes_for_channel
-        keys_to_keep = set(channel_emotes)
-        data = {key: value for key, value in data.items() if key in keys_to_keep}
-        
-        # Записываем обновленные данные во временный файл
-        temp_file_path = None
-        try:
-            with tempfile.NamedTemporaryFile('w', delete=False, dir=DATA_DIR, suffix='.tmp', encoding='utf-8') as temp_file:
-                temp_file_path = temp_file.name
-                json.dump(data, temp_file, indent=4)
+        # Явно используем контекст приложения
+        with application.app_context():
+            channel_emotes = await get_emote_names(await get_emotes(UID7TV[channel]))
             
-            # После успешной записи во временный файл, заменяем основной файл
-            os.replace(temp_file_path, channel_file_path)
-            print(f'Successfully updated {channel_filename}')
-            logger.info(f'Successfully updated {channel_filename}')
+            # Очистка старых эмодзи
+            channel_obj = Channel.query.filter_by(name=channel).first()
+            if channel_obj:
+                # Удаляем эмодзи, которых нет в текущем списке
+                for emote in channel_obj.emotes:
+                    if emote.name not in channel_emotes:
+                        db.session.delete(emote)
+                
+                # Добавляем новые эмодзи
+                existing_emotes = {e.name for e in channel_obj.emotes}
+                for emote_name in channel_emotes:
+                    if emote_name not in existing_emotes:
+                        new_emote = Emote(name=emote_name, count=0, channel=channel_obj)
+                        db.session.add(new_emote)
+                
+                db.session.commit()
             
-        except Exception as e:
-            if temp_file_path and os.path.exists(temp_file_path):
-                os.remove(temp_file_path)
-            raise e
-
-        return channel_emotes
-    
+            return channel_emotes
+            
     except Exception as e:
         logger.error(f'Error loading emotes for channel {channel}: {e}')
         return []

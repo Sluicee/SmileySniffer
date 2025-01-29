@@ -5,10 +5,11 @@ from gevent.pywsgi import WSGIServer
 from dotenv import load_dotenv
 from flask_assets import Environment, Bundle
 from bot import Bot
-import json
 import logging
 from threading import Thread
 import asyncio
+from config import application, db  # Импорт из config.py
+import json
 
 
 dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
@@ -39,10 +40,6 @@ CHANNELS = os.getenv('CHANNELS').split(',')
 CHANNELS = [channel.strip().lower() for channel in CHANNELS]
 DATA_DIR = os.getenv('DATA_DIR')
 
-application = Flask(__name__)
-application.config['ASSETS_DEBUG'] = True
-application.debug = True
-
 assets = Environment(application)
 assets.register('main_css', Bundle('styles/main.css', output='gen/main.css'))
 assets.register('main_js', Bundle('scripts/main.js', output='gen/main.js'))
@@ -72,20 +69,6 @@ async def get_emotes_by_channel(channel_name):
     else:
         return "Emotes не найдены", 404
 
-@application.route('/download/<channel>.json', methods=['GET'])
-def download_json(channel):
-    channel_file_path = os.path.join(DATA_DIR, f'{channel}.json')
-    
-    if os.path.exists(channel_file_path):
-        try:
-            with open(channel_file_path, 'r') as file:
-                data = json.load(file)
-            return jsonify(data)
-        except Exception as e:
-            return jsonify({'status': 'Failed to send file', 'error': str(e)}), 500
-    else:
-        return jsonify({'status': 'File not found'}), 404
-
 def run_flask():
     try:
         logger.info("Starting Flask server...")
@@ -103,6 +86,7 @@ def run_bot():
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
         bot = Bot()
+        bot.application = application  # Передаем приложение в бота
         bot.run()
     except Exception as e:
         logger.error(f"Error running bot: {e}")
