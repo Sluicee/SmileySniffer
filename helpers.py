@@ -9,12 +9,13 @@ from dotenv import load_dotenv
 import logging
 from config import application, db
 from models import Channel, Emote
+import aiohttp
 
 dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
 if os.path.exists(dotenv_path):
     load_dotenv(dotenv_path)
     
-logger = logging.getLogger('flask_app')
+logger = logging.getLogger('config')
 
 API_URL_7TV = 'https://7tv.io/v3'
 USERS_7TV_API = '/users/'
@@ -30,7 +31,6 @@ for item in items:
         key = parts[0].strip().lower()
         value = parts[1].strip().lower()
         UID7TV[key] = value
-DATA_DIR = os.getenv('DATA_DIR')
 
 for item in items:
     parts = item.split("=")
@@ -50,13 +50,10 @@ async def get_7tv_user_emote_set_id(channel_id):
 
 async def get_7tv_emotes(channel_id):
     emote_set = (await get_7tv_user_emote_set_id(channel_id))["emote_sets"][0]['id']
-    url = API_URL_7TV + EMOTESETS_7TV_API + emote_set
-    response = requests.get(url)
-    if response.status_code == 200:
-        return response.json()
-    else:
-        logger.error(f'Error: {response.status_code}')
-        return []
+    async with aiohttp.ClientSession() as session:
+        url = f"{API_URL_7TV}/emote-sets/{emote_set}"
+        async with session.get(url) as response:
+            return await response.json()
 
 async def get_emotes(channel_id):
     emotes = await get_7tv_emotes(channel_id)

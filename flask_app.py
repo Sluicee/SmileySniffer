@@ -1,6 +1,6 @@
 import os
 import helpers
-from flask import Flask, request, jsonify, render_template, send_file
+from flask import jsonify, render_template
 from gevent.pywsgi import WSGIServer
 from dotenv import load_dotenv
 from flask_assets import Environment, Bundle
@@ -18,15 +18,8 @@ if os.path.exists(dotenv_path):
     load_dotenv(dotenv_path)
 
 # Настройка логирования
-try:
-    if not os.path.exists('logs'):
-        os.makedirs('logs')
-    logging.basicConfig(level=logging.INFO, filename="logs/py_log.log", filemode="w", encoding='utf-8', format="%(asctime)s %(levelname)s %(message)s")
-    logger = logging.getLogger('flask_app')
-    logger.info("Starting server and bot")
-except Exception as e:
-    print(f"Failed to set up logging: {e}")
-    raise
+logger = logging.getLogger('config')
+logger.info("Starting server and bot")
 
 env_value = os.getenv("UID7TV")
 items = env_value.split(",") if env_value else []
@@ -39,7 +32,6 @@ for item in items:
         UID7TV[key] = value
 CHANNELS = os.getenv('CHANNELS').split(',')
 CHANNELS = [channel.strip().lower() for channel in CHANNELS]
-DATA_DIR = os.getenv('DATA_DIR')
 
 assets = Environment(application)
 assets.register('main_css', Bundle('styles/main.css', output='gen/main.css'))

@@ -70,54 +70,40 @@ async function fetchEmotes() {
 
 function updateEmotesTable(emotes, dataEmotesCount) {
     const emotesTableBody = document.querySelector('#emotes-table tbody');
-    const rows = emotesTableBody.querySelectorAll('tr');
-    const emoteMap = new Map();
+    const fragment = document.createDocumentFragment(); // Создаем фрагмент в памяти
 
-    // Создание карты для быстрого доступа к строкам таблицы
-    rows.forEach(row => {
-        const name = row.querySelector('td:nth-child(3)').textContent.trim();
-        emoteMap.set(name, row);
-    });
-
-    // Обновление значений и порядка строк
+    // Создаем новые строки и добавляем их во фрагмент
     emotes.forEach((emt, index) => {
-        let row = emoteMap.get(emt.name);
-        if (!row) {
-            // Если строки нет в таблице, создаем новую
-            row = document.createElement('tr');
-            const numberTd = document.createElement('td');
-            numberTd.textContent = index + 1; // Добавляем порядковый номер
-            row.appendChild(numberTd);
+        const row = document.createElement('tr');
 
-            const imgTd = document.createElement('td');
-            const img = document.createElement('img');
-            img.classList.add('lazy');
-            img.dataset.src = emt.image_url;
-            imgTd.appendChild(img);
-            row.appendChild(imgTd);
+        // Столбец "Ранг"
+        const rankTd = document.createElement('td');
+        rankTd.textContent = index + 1;
+        row.appendChild(rankTd);
 
-            const nameTd = document.createElement('td');
-            nameTd.textContent = emt.name;
-            row.appendChild(nameTd);
+        // Столбец "Изображение"
+        const imgTd = document.createElement('td');
+        const img = document.createElement('img');
+        img.classList.add('lazy');
+        img.dataset.src = emt.image_url; // Используем поле image_url из данных
+        imgTd.appendChild(img);
+        row.appendChild(imgTd);
 
-            const counterTd = document.createElement('td');
-            counterTd.textContent = dataEmotesCount[emt.name] || "0";
-            row.appendChild(counterTd);
+        // Столбец "Название"
+        const nameTd = document.createElement('td');
+        nameTd.textContent = emt.name;
+        row.appendChild(nameTd);
 
-            emotesTableBody.appendChild(row);
-        } else {
-            // Обновляем существующую строку
-            row.querySelector('td:nth-child(1)').textContent = index + 1; // Обновляем порядковый номер
-            row.querySelector('td:nth-child(4)').textContent = dataEmotesCount[emt.name] || "0"; // Обновляем счетчик
-        }
+        // Столбец "Счетчик"
+        const countTd = document.createElement('td');
+        countTd.textContent = dataEmotesCount[emt.name] || "0";
+        row.appendChild(countTd);
+
+        fragment.appendChild(row); // Добавляем строку во фрагмент
     });
 
-    // Удаляем строки, которых больше нет в списке
-    emoteMap.forEach((row, name) => {
-        if (!emotes.find(emt => emt.name === name)) {
-            emotesTableBody.removeChild(row);
-        }
-    });
+    // Вставляем все строки за одну операцию
+    emotesTableBody.appendChild(fragment);
 }
 
 function handleSearch() {

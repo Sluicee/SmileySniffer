@@ -1,4 +1,5 @@
 import os
+from sqlalchemy import update
 import helpers
 from dotenv import load_dotenv
 from twitchio.ext import commands
@@ -22,10 +23,9 @@ CHANNELS = [channel.strip().lower() for channel in CHANNELS]
 env_value = os.getenv("UID7TV")
 items = env_value.split(",") if env_value else []
 UID7TV = {item.split("=")[0].strip().lower(): item.split("=")[1].strip().lower() for item in items if "=" in item}
-DATA_DIR = os.getenv('DATA_DIR')
 TOP_COMMAND_MAX_LIST = int(os.getenv("TOP_COMMAND_MAX_LIST"))
 
-logger = logging.getLogger('flask_app')
+logger = logging.getLogger('config')
 
 
 class Bot(commands.Bot):
@@ -181,18 +181,16 @@ class Bot(commands.Bot):
                 if not channel:
                     channel = Channel(name=channel_name)
                     db.session.add(channel)
-                    db.session.commit()
+                    db.session.commit()  # Фиксируем канал в БД перед созданием Emote
 
+                # Теперь channel.id доступен
                 emote = Emote.query.filter_by(name=word, channel_id=channel.id).first()
                 if emote:
                     emote.count += 1
                 else:
-                    emote = Emote(name=word, count=1, channel=channel)
+                    emote = Emote(name=word, count=1, channel=channel)  # Используем отношение
                     db.session.add(emote)
                 
                 db.session.commit()
-                logger.debug('Word saved successfully')
-                
         except Exception as e:
-            logger.error('Error saving word: %s', str(e))
-            print('Error saving word:', str(e))
+            logger.error(f'Error saving word: {str(e)}')
