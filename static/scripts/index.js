@@ -6,33 +6,31 @@ async function fetchChannels() {
         }
 
         const channels = await response.json();
-        const avatars = JSON.parse(document.getElementById('avatars-data').textContent); // Получаем массив аватаров из скрытого элемента
-        const channelsTableBody = document.querySelector('#channels-table tbody');
-        channelsTableBody.innerHTML = ''; // Очищаем таблицу перед добавлением новых данных
+        const avatars = JSON.parse(document.getElementById('avatars-data').textContent);
+        const channelsContainer = document.querySelector('.channels-list-wrapper');
+        channelsContainer.innerHTML = ''; // Очищаем перед добавлением новых данных
 
         channels.forEach((channel, index) => {
-            const tr = document.createElement('tr');
+            const card = document.createElement('a'); // Создаем <a>
+            card.href = `/${channel}`; // Делаем всю карточку ссылкой
+            card.classList.add('channel-card');
 
-            const avatarTd = document.createElement('td');
             const avatarImg = document.createElement('img');
-            avatarImg.src = avatars[index]; // Используем соответствующий аватар
+            avatarImg.src = avatars[index];
             avatarImg.alt = `${channel} avatar`;
-            avatarTd.appendChild(avatarImg);
-            tr.appendChild(avatarTd);
+            avatarImg.classList.add('channel-avatar');
 
-            const nameTd = document.createElement('td');
-            const link = document.createElement('a');
-            link.href = `/${channel}`;
-            link.textContent = channel;
-            nameTd.appendChild(link);
-            tr.appendChild(nameTd);
+            const name = document.createElement('div');
+            name.textContent = channel;
+            name.classList.add('channel-name');
 
-            channelsTableBody.appendChild(tr);
+            card.appendChild(avatarImg);
+            card.appendChild(name);
+            channelsContainer.appendChild(card);
         });
     } catch (error) {
         console.error('Error occurred while fetching channels:', error);
     }
 }
 
-// Вызываем функцию fetchChannels при загрузке страницы
 document.addEventListener('DOMContentLoaded', fetchChannels);

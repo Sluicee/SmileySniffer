@@ -225,6 +225,73 @@ body {
     animation: spin 1s linear infinite; /* Анимация вращения */
 }
 
+.channels-list-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px; /* Отступы между карточками */
+    justify-content: center;
+    overflow: hidden;
+}
+
+.channels-grid {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+
+.channel-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #131313;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease;
+    width: 120px;
+    text-align: center;
+    text-decoration: none;
+}
+
+.channel-card:hover {
+    transform: scale(1.05);
+    text-decoration: none;
+}
+
+.channel-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    margin-bottom: 10px;
+}
+
+.channel-name {
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.channel-name:hover {
+    text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+    .channel-card {
+        width: 100px;
+        padding: 10px;
+    }
+
+    .channel-avatar {
+        width: 60px;
+        height: 60px;
+    }
+
+    .channel-name {
+        font-size: 14px;
+    }
+}
+
 @keyframes spin {
     to {
         transform: rotate(360deg);
