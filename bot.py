@@ -132,7 +132,7 @@ class Bot(commands.Bot):
     async def top(self, ctx: commands.Context, amount: Optional[int]):
         """Команда для получения топа эмодзи."""
         if amount is None:
-            await ctx.channel.send(f'Топ смайликов 7TV: https://emotes.sluicee.space/{ctx.channel.name} (SSL когда-нибудь куплю aga )')
+            await ctx.channel.send(f'Топ смайликов 7TV: https://emotes.sluicee.ru/{ctx.channel.name}')
         elif amount <= TOP_COMMAND_MAX_LIST:
             await self.send_channel_emotes(ctx, amount, order='desc')
 
@@ -141,7 +141,7 @@ class Bot(commands.Bot):
     async def latest(self, ctx: commands.Context, amount: Optional[int]):
         """Команда для получения последних использованных эмодзи."""
         if amount is None:
-            await ctx.channel.send(f'Последние смайлики 7TV: https://emotes.sluicee.space/{ctx.channel.name} (SSL когда-нибудь куплю aga )')
+            await ctx.channel.send(f'Последние смайлики 7TV: https://emotes.sluicee.ru/{ctx.channel.name}')
         elif amount <= TOP_COMMAND_MAX_LIST:
             await self.send_channel_emotes(ctx, amount, order='asc')
 
